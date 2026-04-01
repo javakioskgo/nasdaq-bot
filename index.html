@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TQQQ / CASH Signal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="hero card">
+      <div>
+        <h1>TQQQ / CASH Signal</h1>
+        <p class="muted">전일 QQQ 종가 기준 신호 앱</p>
+        <p class="muted" id="today-date">오늘 날짜: -</p>
+        <p class="muted" id="signal-date">기준일: -</p>
+      </div>
+      <div class="hero-right">
+        <div id="signal-badge" class="badge">오늘 대응: -</div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <div class="reason-title">판단 사유</div>
+        <div class="reason" id="reason">불러오는 중...</div>
+
+        <div class="metric-grid">
+          <div class="metric"><div class="label">QQQ 전일 종가</div><div class="value" id="last-close">-</div></div>
+          <div class="metric"><div class="label">전일 대비</div><div class="value" id="daily-return">-</div></div>
+          <div class="metric"><div class="label">EMA5</div><div class="value" id="ema5">-</div></div>
+          <div class="metric"><div class="label">EMA20</div><div class="value" id="ema20">-</div></div>
+          <div class="metric"><div class="label">EMA5 기울기</div><div class="value" id="ema5-slope">-</div></div>
+          <div class="metric"><div class="label">EMA20 기울기</div><div class="value" id="ema20-slope">-</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title-sm">최종 판단 근거</div>
+        <div id="final-trigger" class="final-trigger">-</div>
+
+        <div class="title-sm" style="margin-top:20px;">전략 체크</div>
+        <div class="check-row"><span>5EMA > 20EMA</span><span id="cond-ema-cross">-</span></div>
+        <div class="check-row"><span>20EMA 기울기 > 0</span><span id="cond-ema20-up">-</span></div>
+        <div class="check-row"><span>5EMA 기울기 > 0</span><span id="cond-ema5-up">-</span></div>
+        <div class="check-row"><span>QQQ 전일 -3% 급락</span><span id="cond-emergency-exit">-</span></div>
+        <div class="check-row"><span>20EMA 아래 2봉 연속</span><span id="cond-below-2">-</span></div>
+        <div class="check-row"><span>최근 5봉 중 3봉 이상 20EMA 아래</span><span id="cond-below-5-3">-</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="title-sm">QQQ 차트 (최근 60거래일)</div>
+      <canvas id="chart" height="120"></canvas>
+    </section>
+
+    <footer class="footer">
+      <p>GitHub Pages 정적 웹페이지 + GitHub Actions 매일 자동 갱신</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

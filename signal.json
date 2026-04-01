@@ -1,0 +1,23 @@
+{
+  "today_date": "-",
+  "signal_date": "-",
+  "signal": "CASH",
+  "reason": "GitHub Actions가 아직 signal.json을 생성하지 않았습니다.",
+  "final_trigger": "먼저 Actions에서 Update signal.json 을 실행하세요.",
+  "last_close": "-",
+  "daily_return": "-",
+  "ema5": "-",
+  "ema20": "-",
+  "ema5_slope": "-",
+  "ema20_slope": "-",
+  "cond_ema_cross": false,
+  "cond_ema20_up": false,
+  "cond_ema5_up": false,
+  "cond_emergency_exit": false,
+  "cond_below_2": false,
+  "cond_below_5_3": false,
+  "labels": [],
+  "close_data": [],
+  "ema5_data": [],
+  "ema20_data": []
+}
