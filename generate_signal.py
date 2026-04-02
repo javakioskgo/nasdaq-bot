@@ -158,11 +158,11 @@ def main():
             "cond_below_lookback_required=True"
         ])
 
-    elif is_sideways:
+    elif is_sideways and last_ema20_slope < 0:
         signal = "CASH"
         market_state = "SIDEWAYS"
-        reason = "횡보장으로 판단되어 진입하지 않고 관망합니다."
-        final_trigger = "🟡 횡보장 필터 → CASH"
+        reason = "하락 추세에서 횡보 구간으로 판단되어 관망합니다."
+        final_trigger = "🟡 하락 횡보 → CASH"
         decision_path.append("is_sideways=True")
 
     elif cond_ema20_up and cond_ema5_up and cond_above_n:
