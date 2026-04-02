@@ -1,5 +1,6 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import pandas as pd
 import yfinance as yf
 
@@ -21,8 +22,7 @@ def main():
 
     last_idx = close.index[-1]
     signal_date = pd.to_datetime(last_idx).strftime("%Y-%m-%d")
-    today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
+    today_date = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d")
     last_close = float(close.iloc[-1])
     last_daily_return = float(daily_return.iloc[-1])
     last_ema5 = float(ema5.iloc[-1])
