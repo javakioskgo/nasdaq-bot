@@ -211,86 +211,109 @@ def main():
     # =========================
     # 디버깅 / 로그용 payload
     # =========================
-    payload = {
-        "meta": {
-            "generated_at_kst": generated_at_kst,
-            "today_date": today_date,
-            "signal_date": signal_date,
-            "symbol": SYMBOL,
-            "download_period": DOWNLOAD_PERIOD,
-            "download_interval": DOWNLOAD_INTERVAL,
-            "data_points": int(len(close))
-        },
-        "strategy_params": {
-            "EMA_FAST_SPAN": EMA_FAST_SPAN,
-            "EMA_SLOW_SPAN": EMA_SLOW_SPAN,
-            "EMERGENCY_DROP_PCT": EMERGENCY_DROP_PCT,
-            "SIDEWAYS_SLOPE_PCT_THRESHOLD": SIDEWAYS_SLOPE_PCT_THRESHOLD,
-            "SIDEWAYS_DISTANCE_THRESHOLD": SIDEWAYS_DISTANCE_THRESHOLD,
-            "DOWN_ACCEL_RATIO": DOWN_ACCEL_RATIO,
-            "ABOVE_CONFIRM_BARS": ABOVE_CONFIRM_BARS,
-            "BELOW_CONFIRM_BARS": BELOW_CONFIRM_BARS,
-            "BELOW_LOOKBACK_BARS": BELOW_LOOKBACK_BARS,
-            "BELOW_REQUIRED_COUNT": BELOW_REQUIRED_COUNT
-        },
-        "signal_summary": {
-            "signal": signal,
-            "market_state": market_state,
-            "reason": reason,
-            "final_trigger": final_trigger,
-            "decision_path": decision_path
-        },
-        "latest_price_info": {
-            "last_close": round(last_close, 2),
-            "prev_close": round(prev_close, 2),
-            "daily_return_pct": round(last_daily_return * 100, 2)
-        },
-        "latest_indicator_info": {
-            "ema5": round(last_ema5, 4),
-            "ema20": round(last_ema20, 4),
-            "ema5_slope": round(last_ema5_slope, 6),
-            "ema20_slope": round(last_ema20_slope, 6),
-            "ema5_slope_pct": round(ema5_slope_pct * 100, 4),
-            "ema20_slope_pct": round(ema20_slope_pct * 100, 4)
-        },
-        "condition_values": {
-            "ema20_strength_abs": round(ema20_strength_abs, 6),
-            "ema20_strength_pct": round(ema20_strength_pct * 100, 4),
-            "price_distance_pct": round(price_distance * 100, 4),
-            "below_lookback_count": below_lookback_count,
-            "down_acceleration_ratio": round(down_acceleration_ratio, 4) if down_acceleration_ratio is not None else None
-        },
-        "conditions": {
-            "cond_ema_cross": cond_ema_cross,
-            "cond_ema20_up": cond_ema20_up,
-            "cond_ema5_up": cond_ema5_up,
-            "cond_ema20_down": cond_ema20_down,
-            "cond_ema5_down": cond_ema5_down,
-            "cond_emergency_exit": cond_emergency_exit,
-            "cond_above_n": cond_above_n,
-            "cond_below_n": cond_below_n,
-            "cond_below_lookback_required": cond_below_lookback_required,
-            "cond_down_acceleration": cond_down_acceleration,
-            "is_sideways": is_sideways
-        },
-        "display": {
-            "last_close": f"{last_close:,.2f}",
-            "daily_return": f"{last_daily_return * 100:+.2f}%",
-            "ema5": f"{last_ema5:,.2f}",
-            "ema20": f"{last_ema20:,.2f}",
-            "ema5_slope": f"{last_ema5_slope:+.4f}",
-            "ema20_slope": f"{last_ema20_slope:+.4f}",
-            "ema5_slope_pct": f"{ema5_slope_pct * 100:+.4f}%",
-            "ema20_slope_pct": f"{ema20_slope_pct * 100:+.4f}%",
-            "price_distance_pct": f"{price_distance * 100:.2f}%"
-        },
-        "chart_data": {
-            "labels": labels,
-            "close_data": close_data,
-            "ema5_data": ema5_data,
-            "ema20_data": ema20_data
-        }
+   payload = {
+    # 기존 HTML 호환용 키
+    "today_date": today_date,
+    "signal_date": signal_date,
+    "signal": signal,
+    "reason": reason,
+    "final_trigger": final_trigger,
+    "last_close": f"{last_close:,.2f}",
+    "daily_return": f"{last_daily_return * 100:+.2f}%",
+    "ema5": f"{last_ema5:,.2f}",
+    "ema20": f"{last_ema20:,.2f}",
+    "ema5_slope": f"{last_ema5_slope:+.4f}",
+    "ema20_slope": f"{last_ema20_slope:+.4f}",
+    "cond_ema_cross": cond_ema_cross,
+    "cond_ema20_up": cond_ema20_up,
+    "cond_ema5_up": cond_ema5_up,
+    "cond_emergency_exit": cond_emergency_exit,
+    "is_sideways": is_sideways,
+    "labels": labels,
+    "close_data": close_data,
+    "ema5_data": ema5_data,
+    "ema20_data": ema20_data,
+
+    # 새 디버깅용 구조
+    "meta": {
+        "generated_at_kst": generated_at_kst,
+        "today_date": today_date,
+        "signal_date": signal_date,
+        "symbol": SYMBOL,
+        "download_period": DOWNLOAD_PERIOD,
+        "download_interval": DOWNLOAD_INTERVAL,
+        "data_points": int(len(close))
+    },
+    "strategy_params": {
+        "EMA_FAST_SPAN": EMA_FAST_SPAN,
+        "EMA_SLOW_SPAN": EMA_SLOW_SPAN,
+        "EMERGENCY_DROP_PCT": EMERGENCY_DROP_PCT,
+        "SIDEWAYS_SLOPE_PCT_THRESHOLD": SIDEWAYS_SLOPE_PCT_THRESHOLD,
+        "SIDEWAYS_DISTANCE_THRESHOLD": SIDEWAYS_DISTANCE_THRESHOLD,
+        "DOWN_ACCEL_RATIO": DOWN_ACCEL_RATIO,
+        "ABOVE_CONFIRM_BARS": ABOVE_CONFIRM_BARS,
+        "BELOW_CONFIRM_BARS": BELOW_CONFIRM_BARS,
+        "BELOW_LOOKBACK_BARS": BELOW_LOOKBACK_BARS,
+        "BELOW_REQUIRED_COUNT": BELOW_REQUIRED_COUNT
+    },
+    "signal_summary": {
+        "signal": signal,
+        "market_state": market_state,
+        "reason": reason,
+        "final_trigger": final_trigger,
+        "decision_path": decision_path
+    },
+    "latest_price_info": {
+        "last_close_raw": round(last_close, 2),
+        "prev_close_raw": round(prev_close, 2),
+        "daily_return_pct_raw": round(last_daily_return * 100, 2)
+    },
+    "latest_indicator_info": {
+        "ema5_raw": round(last_ema5, 4),
+        "ema20_raw": round(last_ema20, 4),
+        "ema5_slope_raw": round(last_ema5_slope, 6),
+        "ema20_slope_raw": round(last_ema20_slope, 6),
+        "ema5_slope_pct": round(ema5_slope_pct * 100, 4),
+        "ema20_slope_pct": round(ema20_slope_pct * 100, 4)
+    },
+    "condition_values": {
+        "ema20_strength_abs": round(ema20_strength_abs, 6),
+        "ema20_strength_pct": round(ema20_strength_pct * 100, 4),
+        "price_distance_pct": round(price_distance * 100, 4),
+        "below_lookback_count": below_lookback_count,
+        "down_acceleration_ratio": round(down_acceleration_ratio, 4) if down_acceleration_ratio is not None else None
+    },
+    "conditions": {
+        "cond_ema_cross": cond_ema_cross,
+        "cond_ema20_up": cond_ema20_up,
+        "cond_ema5_up": cond_ema5_up,
+        "cond_ema20_down": cond_ema20_down,
+        "cond_ema5_down": cond_ema5_down,
+        "cond_emergency_exit": cond_emergency_exit,
+        "cond_above_n": cond_above_n,
+        "cond_below_n": cond_below_n,
+        "cond_below_lookback_required": cond_below_lookback_required,
+        "cond_down_acceleration": cond_down_acceleration,
+        "is_sideways": is_sideways
+    },
+    "display": {
+        "last_close": f"{last_close:,.2f}",
+        "daily_return": f"{last_daily_return * 100:+.2f}%",
+        "ema5": f"{last_ema5:,.2f}",
+        "ema20": f"{last_ema20:,.2f}",
+        "ema5_slope": f"{last_ema5_slope:+.4f}",
+        "ema20_slope": f"{last_ema20_slope:+.4f}",
+        "ema5_slope_pct": f"{ema5_slope_pct * 100:+.4f}%",
+        "ema20_slope_pct": f"{ema20_slope_pct * 100:+.4f}%",
+        "price_distance_pct": f"{price_distance * 100:.2f}%"
+    },
+    "chart_data": {
+        "labels": labels,
+        "close_data": close_data,
+        "ema5_data": ema5_data,
+        "ema20_data": ema20_data
     }
+}
 
     with open("signal.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
