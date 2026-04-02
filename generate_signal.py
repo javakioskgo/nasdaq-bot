@@ -56,7 +56,7 @@ def main():
 
     is_sideways = (
         ema20_strength < 0.05 and
-        price_distance < 0.01
+        price_distance < 0.02
     )
 
     if cond_emergency_exit:
