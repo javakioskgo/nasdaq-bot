@@ -47,7 +47,7 @@ def main():
 
 
 ema20_strength = abs(last_ema20_slope)
-price_distance = abs(close_price - ema20) / ema20
+price_distance = abs(last_close - last_ema20) / last_ema20
 
 is_sideways = (
     ema20_strength < 0.05 or
