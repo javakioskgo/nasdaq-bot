@@ -55,7 +55,7 @@ def main():
     price_distance = abs(last_close - last_ema20) / last_ema20
 
     is_sideways = (
-        ema20_strength < 0.05 or
+        ema20_strength < 0.05 and
         price_distance < 0.01
     )
 
