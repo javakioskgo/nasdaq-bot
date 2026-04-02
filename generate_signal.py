@@ -68,9 +68,9 @@ def main():
         reason = "상승 기본조건 충족: 5EMA > 20EMA, 20EMA 기울기 > 0 입니다."
         final_trigger = "📈 상승 추세 확인: 5EMA > 20EMA, 20EMA 상승 → TQQQ"
     else:
-        signal = "TQQQ" if last_ema20_slope > 0 else "CASH"
-        reason = "기본 강제 판단: 20EMA 기울기 기준으로 방향을 결정했습니다."
-        final_trigger = "⚖️ 기본 판단: 20EMA 방향이 위쪽 → TQQQ" if signal == "TQQQ" else "⚖️ 기본 판단: 20EMA 방향이 아래쪽 → CASH"
+        signal = "CASH"
+        reason = "추세가 명확하지 않아 관망합니다."
+        final_trigger = "⚖️ 방향 불명확 → CASH"
 
     recent_close = close.tail(60)
     ema5_recent = recent_close.ewm(span=5, adjust=False).mean()
