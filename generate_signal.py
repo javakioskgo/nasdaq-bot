@@ -45,32 +45,56 @@ def main():
     cond_emergency_exit = last_daily_return <= -0.03
     cond_below_5_3 = below_5_count >= 3
 
-    if cond_emergency_exit:
-        signal = "CASH"
-        reason = "QQQ 전일 종가가 전일 대비 3% 이상 하락해 긴급 피신 조건이 발동했습니다."
-        final_trigger = "🚨 긴급 피신: QQQ 전일 -3% 급락 → CASH"
-    elif (
-        last_ema20_slope < 0 and
-        last_ema5_slope < 0 and
-        abs(last_ema5_slope) >= 1.5 * abs(last_ema20_slope) and
-        cond_below_2 and
-        cond_below_5_3
-    ):
-        signal = "CASH"
-        reason = "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, 20EMA 아래 2봉 + 최근 5봉 중 3봉 이상 아래."
-        final_trigger = "📉 하락 전환 확정: EMA 하락 + 20EMA 아래 지속 → CASH"
-    elif last_ema20_slope > 0 and last_ema5_slope > 0 and cond_above_2:
-        signal = "TQQQ"
-        reason = "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 2봉 연속입니다."
-        final_trigger = "📈 상승 복귀 확인: EMA 기울기 양수 + 20EMA 위 2봉 → TQQQ"
-    elif cond_ema_cross and cond_ema20_up:
-        signal = "TQQQ"
-        reason = "상승 기본조건 충족: 5EMA > 20EMA, 20EMA 기울기 > 0 입니다."
-        final_trigger = "📈 상승 추세 확인: 5EMA > 20EMA, 20EMA 상승 → TQQQ"
-    else:
-        signal = "CASH"
-        reason = "추세가 명확하지 않아 관망합니다."
-        final_trigger = "⚖️ 방향 불명확 → CASH"
+
+ema20_strength = abs(last_ema20_slope)
+price_distance = abs(close_price - ema20) / ema20
+
+is_sideways = (
+    ema20_strength < 0.05 or
+    price_distance < 0.01
+)
+
+if cond_emergency_exit:
+    signal = "CASH"
+    reason = "QQQ 전일 종가가 전일 대비 3% 이상 하락해 긴급 피신 조건이 발동했습니다."
+    final_trigger = "🚨 긴급 피신: QQQ 전일 -3% 급락 → CASH"
+
+elif (
+    last_ema20_slope < 0 and
+    last_ema5_slope < 0 and
+    abs(last_ema5_slope) >= 1.5 * abs(last_ema20_slope) and
+    cond_below_2 and
+    cond_below_5_3
+):
+    signal = "CASH"
+    reason = "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, 20EMA 아래 2봉 + 최근 5봉 중 3봉 이상 아래."
+    final_trigger = "📉 하락 전환 확정: EMA 하락 + 20EMA 아래 지속 → CASH"
+
+# 🔥 횡보장 필터 (진입 차단 핵심)
+elif is_sideways:
+    signal = "CASH"
+    reason = "횡보장으로 판단되어 진입하지 않고 관망합니다."
+    final_trigger = "🟡 횡보장 필터 → CASH"
+
+# 상승 복귀 (강한 신호)
+elif last_ema20_slope > 0 and last_ema5_slope > 0 and cond_above_2:
+    signal = "TQQQ"
+    reason = "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 2봉 연속입니다."
+    final_trigger = "📈 상승 복귀 확인: EMA 기울기 양수 + 20EMA 위 2봉 → TQQQ"
+
+# 상승 초기 (약한 신호)
+elif cond_ema_cross and cond_ema20_up:
+    signal = "TQQQ"
+    reason = "상승 초기 조건 충족: 5EMA > 20EMA, 20EMA 상승 시작."
+    final_trigger = "📈 초기 상승 진입 → TQQQ"
+
+# 애매한 구간 → 무조건 관망
+else:
+    signal = "CASH"
+    reason = "추세가 명확하지 않아 관망합니다."
+    final_trigger = "⚖️ 방향 불명확 → CASH"
+
+    
 
     recent_close = close.tail(60)
     ema5_recent = recent_close.ewm(span=5, adjust=False).mean()
