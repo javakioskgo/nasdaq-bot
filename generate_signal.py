@@ -211,7 +211,7 @@ def main():
     # =========================
     # 디버깅 / 로그용 payload
     # =========================
-   payload = {
+    payload = {
     # 기존 HTML 호환용 키
     "today_date": today_date,
     "signal_date": signal_date,
