@@ -1,9 +1,10 @@
 {
+  "title": "TQQQ 우선 / 대체자산 추천 시그널",
   "today_date": "2026-04-03",
   "signal_date": "2026-04-02",
-  "signal": "CASH",
-  "reason": "하락 추세에서 횡보 구간으로 판단되어 관망합니다.",
-  "final_trigger": "🟡 하락 횡보 → CASH",
+  "signal": "ERX",
+  "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 XLE가 가장 우호적인 추세를 보여 ERX를 선택했습니다.",
+  "final_trigger": "🔁 QQQ 비추천 → 대체자산 XLE 추천 → ERX",
   "last_close": "584.98",
   "daily_return": "+0.11%",
   "ema5": "579.34",
@@ -263,14 +264,205 @@
     587.04,
     586.84
   ],
+  "summary": {
+    "title": "TQQQ 우선 / 대체자산 추천 시그널",
+    "today_action": "ERX",
+    "final_market_state": "ALT_SELECTED",
+    "final_source": {
+      "type": "ALTERNATIVE",
+      "base_symbol": "XLE",
+      "leveraged_symbol": "ERX"
+    },
+    "primary_symbol": "QQQ",
+    "primary_leveraged_symbol": "TQQQ"
+  },
+  "primary_review": {
+    "symbol": "QQQ",
+    "leveraged_symbol": "TQQQ",
+    "recommendation": "비추천",
+    "market_state": "SIDEWAYS",
+    "reason": "하락 추세에서 횡보 구간으로 판단되어 보유 비추천입니다.",
+    "final_trigger": "🟡 하락 횡보 → 비추천",
+    "decision_path": [
+      "is_sideways=True"
+    ],
+    "display": {
+      "last_close": "584.98",
+      "daily_return": "+0.11%",
+      "ema5": "579.34",
+      "ema20": "586.82",
+      "ema5_slope": "+2.8192",
+      "ema20_slope": "-0.1942",
+      "ema5_slope_pct": "+0.4890%",
+      "ema20_slope_pct": "-0.0331%",
+      "price_distance_pct": "0.31%"
+    },
+    "conditions": {
+      "cond_ema_cross": false,
+      "cond_ema20_up": false,
+      "cond_ema5_up": true,
+      "cond_ema20_down": true,
+      "cond_ema5_down": false,
+      "cond_emergency_exit": false,
+      "cond_above_n": false,
+      "cond_below_n": true,
+      "cond_below_lookback_required": true,
+      "cond_down_acceleration": true,
+      "is_sideways": true
+    },
+    "condition_values": {
+      "ema20_strength_abs": 0.194165,
+      "ema20_strength_pct": 0.0331,
+      "price_distance_pct": 0.3143,
+      "below_lookback_count": 5,
+      "down_acceleration_ratio": 14.5195
+    },
+    "latest_price_info": {
+      "last_close_raw": 584.98,
+      "prev_close_raw": 584.31,
+      "daily_return_pct_raw": 0.11
+    },
+    "latest_indicator_info": {
+      "ema5_raw": 579.3416,
+      "ema20_raw": 586.8246,
+      "ema5_slope_raw": 2.819176,
+      "ema20_slope_raw": -0.194165,
+      "ema5_slope_pct": 0.489,
+      "ema20_slope_pct": -0.0331
+    }
+  },
+  "alt_review": {
+    "selected_alt_brief_reason": "XLE가 추천되어 ERX 선택",
+    "selected_asset": {
+      "base_symbol": "XLE",
+      "leveraged_symbol": "ERX",
+      "reason": "상승 초기 조건 충족: 5EMA > 20EMA, 20EMA 상승 시작.",
+      "final_trigger": "📈 초기 상승 진입 → 추천",
+      "score": -187.0813
+    },
+    "candidates": [
+      {
+        "base_symbol": "TLT",
+        "leveraged_symbol": "TMF",
+        "recommendation": "비추천",
+        "reason": "추세가 명확하지 않아 보유 비추천입니다.",
+        "final_trigger": "⚖️ 방향 불명확 → 비추천",
+        "score": 112.6503,
+        "display": {
+          "last_close": "86.79",
+          "daily_return": "+0.61%",
+          "ema5": "86.38",
+          "ema20": "86.69",
+          "ema5_slope": "+0.2051",
+          "ema20_slope": "+0.0102",
+          "ema5_slope_pct": "+0.2380%",
+          "ema20_slope_pct": "+0.0117%",
+          "price_distance_pct": "0.11%"
+        },
+        "conditions": {
+          "cond_ema_cross": false,
+          "cond_ema20_up": true,
+          "cond_ema5_up": true,
+          "cond_ema20_down": false,
+          "cond_ema5_down": false,
+          "cond_emergency_exit": false,
+          "cond_above_n": false,
+          "cond_below_n": false,
+          "cond_below_lookback_required": true,
+          "cond_down_acceleration": true,
+          "is_sideways": true
+        }
+      },
+      {
+        "base_symbol": "XLE",
+        "leveraged_symbol": "ERX",
+        "recommendation": "추천",
+        "reason": "상승 초기 조건 충족: 5EMA > 20EMA, 20EMA 상승 시작.",
+        "final_trigger": "📈 초기 상승 진입 → 추천",
+        "score": -187.0813,
+        "display": {
+          "last_close": "59.25",
+          "daily_return": "+0.47%",
+          "ema5": "60.12",
+          "ema20": "58.95",
+          "ema5_slope": "-0.4359",
+          "ema20_slope": "+0.0311",
+          "ema5_slope_pct": "-0.7198%",
+          "ema20_slope_pct": "+0.0528%",
+          "price_distance_pct": "0.50%"
+        },
+        "conditions": {
+          "cond_ema_cross": true,
+          "cond_ema20_up": true,
+          "cond_ema5_up": false,
+          "cond_ema20_down": false,
+          "cond_ema5_down": true,
+          "cond_emergency_exit": false,
+          "cond_above_n": true,
+          "cond_below_n": false,
+          "cond_below_lookback_required": false,
+          "cond_down_acceleration": true,
+          "is_sideways": false
+        }
+      },
+      {
+        "base_symbol": "GLD",
+        "leveraged_symbol": "UGL",
+        "recommendation": "비추천",
+        "reason": "추세가 명확하지 않아 보유 비추천입니다.",
+        "final_trigger": "⚖️ 방향 불명확 → 비추천",
+        "score": 132.5005,
+        "display": {
+          "last_close": "429.41",
+          "daily_return": "-1.92%",
+          "ema5": "426.67",
+          "ema20": "434.65",
+          "ema5_slope": "+1.3688",
+          "ema20_slope": "-0.5513",
+          "ema5_slope_pct": "+0.3218%",
+          "ema20_slope_pct": "-0.1267%",
+          "price_distance_pct": "1.20%"
+        },
+        "conditions": {
+          "cond_ema_cross": false,
+          "cond_ema20_up": false,
+          "cond_ema5_up": true,
+          "cond_ema20_down": true,
+          "cond_ema5_down": false,
+          "cond_emergency_exit": false,
+          "cond_above_n": false,
+          "cond_below_n": false,
+          "cond_below_lookback_required": true,
+          "cond_down_acceleration": true,
+          "is_sideways": false
+        }
+      }
+    ]
+  },
   "meta": {
-    "generated_at_kst": "2026-04-03 06:53:39 KST",
+    "generated_at_kst": "2026-04-03 15:08:03 KST",
     "today_date": "2026-04-03",
     "signal_date": "2026-04-02",
-    "symbol": "QQQ",
+    "primary_symbol": "QQQ",
     "download_period": "6mo",
     "download_interval": "1d",
-    "data_points": 125
+    "alternative_assets": [
+      {
+        "base": "TLT",
+        "leveraged": "TMF",
+        "priority": 1
+      },
+      {
+        "base": "XLE",
+        "leveraged": "ERX",
+        "priority": 2
+      },
+      {
+        "base": "GLD",
+        "leveraged": "UGL",
+        "priority": 3
+      }
+    ]
   },
   "strategy_params": {
     "EMA_FAST_SPAN": 5,
@@ -285,57 +477,15 @@
     "BELOW_REQUIRED_COUNT": 3
   },
   "signal_summary": {
-    "signal": "CASH",
-    "market_state": "SIDEWAYS",
-    "reason": "하락 추세에서 횡보 구간으로 판단되어 관망합니다.",
-    "final_trigger": "🟡 하락 횡보 → CASH",
-    "decision_path": [
-      "is_sideways=True"
-    ]
-  },
-  "latest_price_info": {
-    "last_close_raw": 584.98,
-    "prev_close_raw": 584.31,
-    "daily_return_pct_raw": 0.11
-  },
-  "latest_indicator_info": {
-    "ema5_raw": 579.3416,
-    "ema20_raw": 586.8246,
-    "ema5_slope_raw": 2.819176,
-    "ema20_slope_raw": -0.194165,
-    "ema5_slope_pct": 0.489,
-    "ema20_slope_pct": -0.0331
-  },
-  "condition_values": {
-    "ema20_strength_abs": 0.194165,
-    "ema20_strength_pct": 0.0331,
-    "price_distance_pct": 0.3143,
-    "below_lookback_count": 5,
-    "down_acceleration_ratio": 14.5195
-  },
-  "conditions": {
-    "cond_ema_cross": false,
-    "cond_ema20_up": false,
-    "cond_ema5_up": true,
-    "cond_ema20_down": true,
-    "cond_ema5_down": false,
-    "cond_emergency_exit": false,
-    "cond_above_n": false,
-    "cond_below_n": true,
-    "cond_below_lookback_required": true,
-    "cond_down_acceleration": true,
-    "is_sideways": true
-  },
-  "display": {
-    "last_close": "584.98",
-    "daily_return": "+0.11%",
-    "ema5": "579.34",
-    "ema20": "586.82",
-    "ema5_slope": "+2.8192",
-    "ema20_slope": "-0.1942",
-    "ema5_slope_pct": "+0.4890%",
-    "ema20_slope_pct": "-0.0331%",
-    "price_distance_pct": "0.31%"
+    "signal": "ERX",
+    "market_state": "ALT_SELECTED",
+    "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 XLE가 가장 우호적인 추세를 보여 ERX를 선택했습니다.",
+    "final_trigger": "🔁 QQQ 비추천 → 대체자산 XLE 추천 → ERX",
+    "final_source": {
+      "type": "ALTERNATIVE",
+      "base_symbol": "XLE",
+      "leveraged_symbol": "ERX"
+    }
   },
   "chart_data": {
     "labels": [
