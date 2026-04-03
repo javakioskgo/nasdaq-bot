@@ -1,29 +1,282 @@
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fb; color: #1f2937; }
-.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-.card { background: #fff; border-radius: 18px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.06); margin-bottom: 20px; }
-.hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.hero h1 { margin: 0 0 8px 0; font-size: 30px; }
-.muted { color: #6b7280; margin: 4px 0; }
-.hero-right { text-align: right; }
-.badge { display: inline-block; padding: 14px 24px; border-radius: 999px; font-weight: 800; font-size: 24px; background: #e5e7eb; }
-.badge.long { background: #dcfce7; color: #166534; }
-.badge.cash { background: #fff7ed; color: #9a3412; }
-.grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
-.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-.metric { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px; }
-.label { font-size: 12px; color: #6b7280; }
-.value { font-size: 22px; font-weight: 700; margin-top: 6px; }
-.reason-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
-.reason { margin-top: 0; background: #eff6ff; border-radius: 12px; padding: 14px; line-height: 1.5; }
-.final-trigger { background: #fef3c7; border-radius: 12px; padding: 14px; font-weight: 700; color: #92400e; line-height: 1.5; }
-.title-sm { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
-.check-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
-.check-yes { color: #166534; font-weight: 700; }
-.check-no { color: #9a3412; font-weight: 700; }
-.footer { color: #6b7280; text-align: center; padding-bottom: 10px; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero h1 {
+  margin: 0 0 8px 0;
+  font-size: 30px;
+}
+
+.muted {
+  color: #6b7280;
+  margin: 4px 0;
+}
+
+.hero-right {
+  text-align: right;
+}
+
+/* =========================
+   배지 (핵심 수정)
+========================= */
+.badge {
+  display: inline-block;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 24px;
+  background: #e5e7eb;
+}
+
+.badge.long {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.cash {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+/* 🔥 추가: 대체자산용 */
+.badge.alt {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.metric {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.value {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.reason-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.reason {
+  margin-top: 0;
+  background: #eff6ff;
+  border-radius: 12px;
+  padding: 14px;
+  line-height: 1.5;
+}
+
+.final-trigger {
+  background: #fef3c7;
+  border-radius: 12px;
+  padding: 14px;
+  font-weight: 700;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.title-sm {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.check-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.check-yes {
+  color: #166534;
+  font-weight: 700;
+}
+
+.check-no {
+  color: #9a3412;
+  font-weight: 700;
+}
+
+/* =========================
+   🔥 대체자산 UI (신규)
+========================= */
+
+.alt-selected-box {
+  background: #eef2ff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.alt-selected-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.alt-selected-signal {
+  font-size: 26px;
+  font-weight: 900;
+  color: #1d4ed8;
+  margin-bottom: 8px;
+}
+
+.alt-selected-desc {
+  font-size: 14px;
+  color: #374151;
+  margin-top: 4px;
+}
+
+.alt-candidates {
+  display: grid;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.alt-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+.alt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alt-base {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.alt-leveraged {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.alt-status {
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.status-yes {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-no {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.alt-reason {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.alt-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.alt-mini-item {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.alt-trigger {
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #92400e;
+}
+
+/* ========================= */
+
+.footer {
+  color: #6b7280;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
 @media (max-width: 900px) {
-  .hero, .grid { display: block; }
-  .hero-right { text-align: left; margin-top: 14px; }
-  .badge { font-size: 22px; }
+  .hero, .grid {
+    display: block;
+  }
+
+  .hero-right {
+    text-align: left;
+    margin-top: 14px;
+  }
+
+  .badge {
+    font-size: 22px;
+  }
+
+  .alt-mini-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
