@@ -1,6 +1,6 @@
 {
   "title": "TQQQ 우선 / 대체자산 추천 시그널",
-  "today_date": "2026-04-03",
+  "today_date": "2026-04-04",
   "signal_date": "2026-04-02",
   "signal": "ERX",
   "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 XLE가 가장 우호적인 추세를 보여 ERX를 선택했습니다.",
@@ -440,8 +440,8 @@
     ]
   },
   "meta": {
-    "generated_at_kst": "2026-04-03 15:08:03 KST",
-    "today_date": "2026-04-03",
+    "generated_at_kst": "2026-04-04 06:49:54 KST",
+    "today_date": "2026-04-04",
     "signal_date": "2026-04-02",
     "primary_symbol": "QQQ",
     "download_period": "6mo",
