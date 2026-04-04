@@ -383,7 +383,7 @@ def main():
         final_market_state = "PRIMARY_SELECTED"
         reason = (
             "QQQ가 상승 추세로 판단되어 대체자산 검토 없이 "
-            f"{PRIMARY_LEVERAGED_SYMBOL}를 보유합니다."
+            f"{PRIMARY_LEVERAGED_SYMBOL}(레버리지)를 보유합니다."
         )
         final_trigger = f"🥇 QQQ 우선 조건 충족 → {PRIMARY_LEVERAGED_SYMBOL}"
 
@@ -408,7 +408,7 @@ def main():
                 f"QQQ가 {primary_result['market_state']} 상태로 판단되어 "
                 f"{PRIMARY_LEVERAGED_SYMBOL}는 보유하지 않습니다. "
                 f"대체자산을 검토한 결과 {alt_selected['symbol']}가 가장 우호적인 추세를 보여 "
-                f"{alt_selected['leveraged_symbol']}를 선택했습니다."
+                f"{alt_selected['leveraged_symbol']}(레버리지)를 선택했습니다."
             )
             final_trigger = (
                 f"🔁 QQQ 비추천 → 대체자산 {alt_selected['symbol']} 추천 → "
