@@ -227,6 +227,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
     decision_path = []
     recommendation = False
     signal = "CASH"
+    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
 
     if cond_emergency_exit:
         market_state = "EMERGENCY_EXIT"
@@ -276,6 +277,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
+        signal_strength = 2
 
     elif cond_ema_cross and cond_ema20_up:
         market_state = "EARLY_UPTREND"
@@ -287,6 +289,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
+        signal_strength = 1
 
     else:
         market_state = "UNCLEAR"
@@ -309,6 +312,12 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         "is_primary": is_primary,
         "recommendation": recommendation,
         "signal": signal if recommendation else "CASH",
+        "signal_strength": signal_strength,
+        "signal_strength_label": (
+            "STRONG_UPTREND" if signal_strength == 2
+            else "EARLY_UPTREND" if signal_strength == 1
+            else "NOT_RECOMMENDED"
+        ),
         "market_state": market_state,
         "reason": reason,
         "final_trigger": final_trigger,
@@ -327,6 +336,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
 
 
 def select_alternative_asset() -> tuple[dict | None, list]:
+def select_alternative_asset() -> tuple[dict | None, list]:
     alt_results = []
 
     for asset in ALT_ASSETS:
@@ -343,9 +353,14 @@ def select_alternative_asset() -> tuple[dict | None, list]:
     if not recommended:
         return None, alt_results
 
-    recommended.sort(key=lambda x: (-x["score"], x["priority"]))
+    # 우선순위:
+    # 1) 강한 상승(signal_strength=2) 우선
+    # 2) 같은 등급이면 score 높은 자산 우선
+    # 3) 그래도 같으면 priority 작은 자산 우선
+    recommended.sort(
+        key=lambda x: (-x["signal_strength"], -x["score"], x["priority"])
+    )
     return recommended[0], alt_results
-
 
 # =========================
 # 메인 실행
