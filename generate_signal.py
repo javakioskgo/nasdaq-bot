@@ -336,7 +336,6 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
 
 
 def select_alternative_asset() -> tuple[dict | None, list]:
-def select_alternative_asset() -> tuple[dict | None, list]:
     alt_results = []
 
     for asset in ALT_ASSETS:
