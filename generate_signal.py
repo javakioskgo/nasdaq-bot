@@ -13,9 +13,10 @@ PRIMARY_SYMBOL = "QQQ"
 PRIMARY_LEVERAGED_SYMBOL = "TQQQ"
 
 ALT_ASSETS = [
-    {"base": "TLT", "leveraged": "TMF", "priority": 1},
-    {"base": "XLE", "leveraged": "ERX", "priority": 2},
-    {"base": "GLD", "leveraged": "UGL", "priority": 3},
+    {"base": "SOXX", "leveraged": "SOXL", "priority": 1},  # 반도체
+    {"base": "XLE", "leveraged": "ERX", "priority": 2},    # 에너지
+    {"base": "IBB", "leveraged": "LABU", "priority": 3},   # 바이오 (XBI로 바꿔도 OK)
+    {"base": "GLD", "leveraged": "UGL", "priority": 4},    # 금
 ]
 
 DOWNLOAD_PERIOD = "6mo"
@@ -411,7 +412,7 @@ def main():
             reason = (
                 f"QQQ가 {primary_result['market_state']} 상태로 판단되어 "
                 f"{PRIMARY_LEVERAGED_SYMBOL}는 보유하지 않습니다. "
-                "대체자산(TLT, XLE, GLD)도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다."
+                "대체자산(SOXX, XLE, IBB, GLD)도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다."
             )
             final_trigger = "⚖️ QQQ 비추천 + 대체자산 전부 비추천 → CASH"
             final_source = {
