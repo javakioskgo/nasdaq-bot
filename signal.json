@@ -3,7 +3,7 @@
   "today_date": "2026-04-05",
   "signal_date": "2026-04-02",
   "signal": "SOXL",
-  "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL를 선택했습니다.",
+  "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL(레버리지)를 선택했습니다.",
   "final_trigger": "🔁 QQQ 비추천 → 대체자산 SOXX 추천 → SOXL",
   "last_close": "584.98",
   "daily_return": "+0.11%",
@@ -472,7 +472,7 @@
     ]
   },
   "meta": {
-    "generated_at_kst": "2026-04-05 07:48:19 KST",
+    "generated_at_kst": "2026-04-05 07:51:45 KST",
     "today_date": "2026-04-05",
     "signal_date": "2026-04-02",
     "primary_symbol": "QQQ",
@@ -516,7 +516,7 @@
   "signal_summary": {
     "signal": "SOXL",
     "market_state": "ALT_SELECTED",
-    "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL를 선택했습니다.",
+    "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL(레버리지)를 선택했습니다.",
     "final_trigger": "🔁 QQQ 비추천 → 대체자산 SOXX 추천 → SOXL",
     "final_source": {
       "type": "ALTERNATIVE",
