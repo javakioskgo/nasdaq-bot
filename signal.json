@@ -2,9 +2,9 @@
   "title": "TQQQ 우선 / 대체자산 추천 시그널",
   "today_date": "2026-04-04",
   "signal_date": "2026-04-02",
-  "signal": "ERX",
-  "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 XLE가 가장 우호적인 추세를 보여 ERX를 선택했습니다.",
-  "final_trigger": "🔁 QQQ 비추천 → 대체자산 XLE 추천 → ERX",
+  "signal": "SOXL",
+  "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL를 선택했습니다.",
+  "final_trigger": "🔁 QQQ 비추천 → 대체자산 SOXX 추천 → SOXL",
   "last_close": "584.98",
   "daily_return": "+0.11%",
   "ema5": "579.34",
@@ -266,12 +266,12 @@
   ],
   "summary": {
     "title": "TQQQ 우선 / 대체자산 추천 시그널",
-    "today_action": "ERX",
+    "today_action": "SOXL",
     "final_market_state": "ALT_SELECTED",
     "final_source": {
       "type": "ALTERNATIVE",
-      "base_symbol": "XLE",
-      "leveraged_symbol": "ERX"
+      "base_symbol": "SOXX",
+      "leveraged_symbol": "SOXL"
     },
     "primary_symbol": "QQQ",
     "primary_leveraged_symbol": "TQQQ"
@@ -332,32 +332,32 @@
     }
   },
   "alt_review": {
-    "selected_alt_brief_reason": "XLE가 추천되어 ERX 선택",
+    "selected_alt_brief_reason": "SOXX가 추천되어 SOXL 선택",
     "selected_asset": {
-      "base_symbol": "XLE",
-      "leveraged_symbol": "ERX",
-      "reason": "상승 초기 조건 충족: 5EMA > 20EMA, 20EMA 상승 시작.",
-      "final_trigger": "📈 초기 상승 진입 → 추천",
-      "score": -187.0813
+      "base_symbol": "SOXX",
+      "leveraged_symbol": "SOXL",
+      "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 2봉 연속입니다.",
+      "final_trigger": "📈 상승 복귀 확인 → 추천",
+      "score": 2010.59
     },
     "candidates": [
       {
-        "base_symbol": "TLT",
-        "leveraged_symbol": "TMF",
-        "recommendation": "비추천",
-        "reason": "추세가 명확하지 않아 보유 비추천입니다.",
-        "final_trigger": "⚖️ 방향 불명확 → 비추천",
-        "score": 112.6503,
+        "base_symbol": "SOXX",
+        "leveraged_symbol": "SOXL",
+        "recommendation": "추천",
+        "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 2봉 연속입니다.",
+        "final_trigger": "📈 상승 복귀 확인 → 추천",
+        "score": 2010.59,
         "display": {
-          "last_close": "86.79",
-          "daily_return": "+0.61%",
-          "ema5": "86.38",
-          "ema20": "86.69",
-          "ema5_slope": "+0.2051",
-          "ema20_slope": "+0.0102",
-          "ema5_slope_pct": "+0.2380%",
-          "ema20_slope_pct": "+0.0117%",
-          "price_distance_pct": "0.11%"
+          "last_close": "339.61",
+          "daily_return": "+0.32%",
+          "ema5": "333.34",
+          "ema20": "335.39",
+          "ema5_slope": "+3.1348",
+          "ema20_slope": "+0.4438",
+          "ema5_slope_pct": "+0.9494%",
+          "ema20_slope_pct": "+0.1325%",
+          "price_distance_pct": "1.26%"
         },
         "conditions": {
           "cond_ema_cross": false,
@@ -366,11 +366,11 @@
           "cond_ema20_down": false,
           "cond_ema5_down": false,
           "cond_emergency_exit": false,
-          "cond_above_n": false,
+          "cond_above_n": true,
           "cond_below_n": false,
           "cond_below_lookback_required": true,
           "cond_down_acceleration": true,
-          "is_sideways": true
+          "is_sideways": false
         }
       },
       {
@@ -397,6 +397,38 @@
           "cond_ema5_up": false,
           "cond_ema20_down": false,
           "cond_ema5_down": true,
+          "cond_emergency_exit": false,
+          "cond_above_n": true,
+          "cond_below_n": false,
+          "cond_below_lookback_required": false,
+          "cond_down_acceleration": true,
+          "is_sideways": false
+        }
+      },
+      {
+        "base_symbol": "IBB",
+        "leveraged_symbol": "LABU",
+        "recommendation": "추천",
+        "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 2봉 연속입니다.",
+        "final_trigger": "📈 상승 복귀 확인 → 추천",
+        "score": 753.667,
+        "display": {
+          "last_close": "169.43",
+          "daily_return": "-0.41%",
+          "ema5": "167.49",
+          "ema20": "166.86",
+          "ema5_slope": "+0.9675",
+          "ema20_slope": "+0.2707",
+          "ema5_slope_pct": "+0.5810%",
+          "ema20_slope_pct": "+0.1625%",
+          "price_distance_pct": "1.54%"
+        },
+        "conditions": {
+          "cond_ema_cross": true,
+          "cond_ema20_up": true,
+          "cond_ema5_up": true,
+          "cond_ema20_down": false,
+          "cond_ema5_down": false,
           "cond_emergency_exit": false,
           "cond_above_n": true,
           "cond_below_n": false,
@@ -440,7 +472,7 @@
     ]
   },
   "meta": {
-    "generated_at_kst": "2026-04-04 06:49:54 KST",
+    "generated_at_kst": "2026-04-04 22:32:47 KST",
     "today_date": "2026-04-04",
     "signal_date": "2026-04-02",
     "primary_symbol": "QQQ",
@@ -448,8 +480,8 @@
     "download_interval": "1d",
     "alternative_assets": [
       {
-        "base": "TLT",
-        "leveraged": "TMF",
+        "base": "SOXX",
+        "leveraged": "SOXL",
         "priority": 1
       },
       {
@@ -458,9 +490,14 @@
         "priority": 2
       },
       {
+        "base": "IBB",
+        "leveraged": "LABU",
+        "priority": 3
+      },
+      {
         "base": "GLD",
         "leveraged": "UGL",
-        "priority": 3
+        "priority": 4
       }
     ]
   },
@@ -477,14 +514,14 @@
     "BELOW_REQUIRED_COUNT": 3
   },
   "signal_summary": {
-    "signal": "ERX",
+    "signal": "SOXL",
     "market_state": "ALT_SELECTED",
-    "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 XLE가 가장 우호적인 추세를 보여 ERX를 선택했습니다.",
-    "final_trigger": "🔁 QQQ 비추천 → 대체자산 XLE 추천 → ERX",
+    "reason": "QQQ가 SIDEWAYS 상태로 판단되어 TQQQ는 보유하지 않습니다. 대체자산을 검토한 결과 SOXX가 가장 우호적인 추세를 보여 SOXL를 선택했습니다.",
+    "final_trigger": "🔁 QQQ 비추천 → 대체자산 SOXX 추천 → SOXL",
     "final_source": {
       "type": "ALTERNATIVE",
-      "base_symbol": "XLE",
-      "leveraged_symbol": "ERX"
+      "base_symbol": "SOXX",
+      "leveraged_symbol": "SOXL"
     }
   },
   "chart_data": {
