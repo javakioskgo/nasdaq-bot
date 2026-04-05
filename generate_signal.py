@@ -1,10 +1,10 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 import yfinance as yf
-from pykrx import stock
+import FinanceDataReader as fdr
 
 
 # =========================
@@ -44,8 +44,7 @@ OVERSEAS_ALT_ASSETS = [
 
 # =========================
 # 국내 전략
-# 국내는 직전 거래일 마감 기준으로 별도 계산
-# 레버리지 불가 계좌를 감안해 동일 ETF 자체를 추천 대상으로 사용
+# 이름은 FinanceDataReader의 ETF/KR 종목명과 일치해야 함
 # =========================
 DOMESTIC_PRIMARY_NAME = "KODEX 미국나스닥100"
 
@@ -69,30 +68,55 @@ DOMESTIC_ALT_ASSETS = [
 
 
 # =========================
-# 시간 / 날짜 유틸
+# 시간 유틸
 # =========================
 def get_now_kst() -> datetime:
     return datetime.now(ZoneInfo("Asia/Seoul"))
 
 
-def get_recent_krx_business_day_str(lookback_days: int = 14) -> str:
-    now_kst = get_now_kst().date()
-
-    for i in range(lookback_days):
-        day = now_kst - timedelta(days=i)
-        day_str = day.strftime("%Y%m%d")
-        tickers = stock.get_etf_ticker_list(day_str)
-        if tickers:
-            return day_str
-
-    raise ValueError("최근 KRX 거래일을 찾지 못했습니다.")
+# =========================
+# 국내 ETF 코드 조회 (FDR)
+# =========================
+_domestic_code_cache: dict[str, str] = {}
 
 
-def get_recent_krx_business_range(lookback_days: int = 240) -> tuple[str, str]:
-    now_kst = get_now_kst().date()
-    start = now_kst - timedelta(days=lookback_days)
-    end = now_kst
-    return start.strftime("%Y%m%d"), end.strftime("%Y%m%d")
+def build_domestic_etf_name_map() -> dict[str, str]:
+    df = fdr.StockListing("ETF/KR")
+
+    if df.empty:
+        raise ValueError("FinanceDataReader에서 ETF/KR 목록을 가져오지 못했습니다.")
+
+    # 표준 컬럼명 기대: Code, Name
+    if "Name" not in df.columns or "Code" not in df.columns:
+        raise ValueError(f"ETF/KR 목록 형식이 예상과 다릅니다. columns={list(df.columns)}")
+
+    name_to_code = {}
+    for _, row in df.iterrows():
+        name = str(row["Name"]).strip()
+        code = str(row["Code"]).strip().zfill(6)
+        if name:
+            name_to_code[name] = code
+
+    return name_to_code
+
+
+def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
+    if etf_name in _domestic_code_cache:
+        return _domestic_code_cache[etf_name]
+
+    name_map = build_domestic_etf_name_map()
+
+    if etf_name not in name_map:
+        candidates = [name for name in name_map.keys() if etf_name.replace(" ", "") in name.replace(" ", "")]
+        sample = ", ".join(sorted(candidates[:10]))
+        raise ValueError(
+            f"국내 ETF 이름 '{etf_name}'을 ETF/KR 목록에서 찾지 못했습니다. "
+            f"유사 후보: {sample if sample else '없음'}"
+        )
+
+    code = name_map[etf_name]
+    _domestic_code_cache[etf_name] = code
+    return code
 
 
 # =========================
@@ -106,29 +130,17 @@ def safe_series_close_from_yf(df: pd.DataFrame) -> pd.Series:
     return close
 
 
-def safe_series_close_from_pykrx(df: pd.DataFrame) -> pd.Series:
+def safe_series_close_from_fdr(df: pd.DataFrame) -> pd.Series:
     if df.empty:
         return pd.Series(dtype=float)
 
-    close = pd.to_numeric(df["종가"], errors="coerce").dropna()
+    if "Close" not in df.columns:
+        raise ValueError(f"국내 ETF 가격 데이터 형식이 예상과 다릅니다. columns={list(df.columns)}")
+
+    close = pd.to_numeric(df["Close"], errors="coerce").dropna()
     close.index = pd.to_datetime(close.index)
     close = close.sort_index()
     return close
-
-
-def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
-    base_day = get_recent_krx_business_day_str()
-    tickers = stock.get_etf_ticker_list(base_day)
-
-    for ticker in tickers:
-        try:
-            name = stock.get_etf_ticker_name(ticker)
-            if name == etf_name:
-                return ticker
-        except Exception:
-            continue
-
-    raise ValueError(f"국내 ETF 이름 '{etf_name}'에 해당하는 종목코드를 찾지 못했습니다.")
 
 
 def download_close_series_overseas(symbol: str) -> pd.Series:
@@ -153,21 +165,24 @@ def download_close_series_overseas(symbol: str) -> pd.Series:
 
 def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
     if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
-        symbol_code = symbol_or_name
+        code = symbol_or_name
+        display_name = symbol_or_name
     else:
-        symbol_code = resolve_domestic_etf_code_by_name(symbol_or_name)
+        code = resolve_domestic_etf_code_by_name(symbol_or_name)
+        display_name = symbol_or_name
 
-    from_date, to_date = get_recent_krx_business_range()
-
-    df = stock.get_etf_ohlcv_by_date(from_date, to_date, symbol_code)
+    df = fdr.DataReader(code)
 
     if df.empty:
-        raise ValueError(f"{symbol_or_name} ({symbol_code}) 국내 ETF 데이터를 가져오지 못했습니다.")
+        raise ValueError(f"{display_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
 
-    close = safe_series_close_from_pykrx(df)
+    close = safe_series_close_from_fdr(df)
+
+    # 최근 6개월만 사용
+    close = close.tail(180)
 
     if len(close) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{symbol_or_name} ({symbol_code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
+        raise ValueError(f"{display_name} ({code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
 
     return close
 
@@ -350,7 +365,7 @@ def evaluate_asset(
     recommendation = False
     signal = "CASH"
     signal_display_name = "CASH"
-    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
+    signal_strength = 0
 
     name_for_text = metrics["display_name"]
 
@@ -644,9 +659,6 @@ def run_strategy(
     }
 
 
-# =========================
-# 메인
-# =========================
 def main():
     now_kst = get_now_kst()
     today_date = now_kst.strftime("%Y-%m-%d")
