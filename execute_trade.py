@@ -1,4 +1,5 @@
 from telegram_notifier import send_telegram_message, format_message
+from email_notifier import send_email, format_email_body
 
 import json
 from datetime import datetime
@@ -6,7 +7,7 @@ from datetime import datetime
 from config import DRY_RUN
 from ibkr_client import IBKRClient
 from state_manager import is_already_executed_today, mark_execution
-from email_notifier import send_email, format_email_body
+
 
 def log(msg):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -30,6 +31,7 @@ def notify_error(error_text, target_name="UNKNOWN", current_symbol="UNKNOWN"):
     )
     send_telegram_message(message)
 
+
 def send_email_step(title, lines):
     body = format_email_body(title, lines)
     send_email(title, body)
@@ -46,6 +48,7 @@ def send_email_error(error_text, target_name="UNKNOWN", current_symbol="UNKNOWN"
             f"DRY_RUN: {DRY_RUN}"
         ]
     )
+    send_email(title, body)
 
 
 def load_signal():
@@ -84,6 +87,14 @@ def main():
                 f"DRY_RUN: {DRY_RUN}"
             ]
         )
+        send_email_step(
+            "자동매매 중복 실행 방지",
+            [
+                "오늘은 이미 자동매매가 실행되었습니다.",
+                "중복 주문 방지를 위해 이번 실행은 종료합니다.",
+                f"DRY_RUN: {DRY_RUN}"
+            ]
+        )
         return
 
     signal_data = load_signal()
@@ -92,6 +103,13 @@ def main():
     log(f"추천 결과: {target_name} ({target_symbol})")
 
     notify_step(
+        "자동매매 실행 시작",
+        [
+            f"추천 종목: {target_name}",
+            f"DRY_RUN: {DRY_RUN}"
+        ]
+    )
+    send_email_step(
         "자동매매 실행 시작",
         [
             f"추천 종목: {target_name}",
@@ -132,11 +150,22 @@ def main():
                     log("❌ 매도 체결 실패 → 중단")
                     action_summary = "매도 실패"
                     notify_error("매도 체결 실패", target_name, current_symbol)
+                    send_email_error("매도 체결 실패", target_name, current_symbol)
                     return
 
                 log("✅ 매도 체결 완료")
 
                 notify_step(
+                    "매도 체결 완료",
+                    [
+                        f"매도 종목: {current_symbol}",
+                        f"주문번호: {sell_result['order_id']}",
+                        f"체결수량: {fill_result['filled_qty']}",
+                        f"평균체결가: {fill_result['avg_price']}",
+                        f"DRY_RUN: {DRY_RUN}"
+                    ]
+                )
+                send_email_step(
                     "매도 체결 완료",
                     [
                         f"매도 종목: {current_symbol}",
@@ -163,11 +192,22 @@ def main():
                     log("❌ 매수 체결 실패")
                     action_summary = "매수 실패"
                     notify_error("매수 체결 실패", target_name, current_symbol)
+                    send_email_error("매수 체결 실패", target_name, current_symbol)
                     return
 
                 log("✅ 매수 체결 완료")
 
                 notify_step(
+                    "매수 체결 완료",
+                    [
+                        f"매수 종목: {target_symbol}",
+                        f"주문번호: {buy_result['order_id']}",
+                        f"체결수량: {fill_result['filled_qty']}",
+                        f"평균체결가: {fill_result['avg_price']}",
+                        f"DRY_RUN: {DRY_RUN}"
+                    ]
+                )
+                send_email_step(
                     "매수 체결 완료",
                     [
                         f"매수 종목: {target_symbol}",
@@ -195,11 +235,23 @@ def main():
                     log("❌ 매도 체결 실패 → 중단")
                     action_summary = "매도 실패"
                     notify_error("매도 체결 실패", target_name, current_symbol)
+                    send_email_error("매도 체결 실패", target_name, current_symbol)
                     return
 
                 log("✅ 매도 체결 완료")
 
                 notify_step(
+                    "매도 체결 완료",
+                    [
+                        f"매도 종목: {current_symbol}",
+                        f"주문번호: {sell_result['order_id']}",
+                        f"체결수량: {fill_result['filled_qty']}",
+                        f"평균체결가: {fill_result['avg_price']}",
+                        "상태: 현금 반영 확인 중",
+                        f"DRY_RUN: {DRY_RUN}"
+                    ]
+                )
+                send_email_step(
                     "매도 체결 완료",
                     [
                         f"매도 종목: {current_symbol}",
@@ -217,6 +269,7 @@ def main():
                     log("❌ 현금 반영 실패 → 중단")
                     action_summary = "현금 반영 실패"
                     notify_error("현금 반영 실패", target_name, current_symbol)
+                    send_email_error("현금 반영 실패", target_name, current_symbol)
                     return
 
                 new_funds = cash_result["available_funds"]
@@ -231,6 +284,7 @@ def main():
                     log("❌ 매수 체결 실패")
                     action_summary = "매수 실패"
                     notify_error("매수 체결 실패", target_name, current_symbol)
+                    send_email_error("매수 체결 실패", target_name, current_symbol)
                     return
 
                 log("✅ 매수 체결 완료")
@@ -246,11 +300,23 @@ def main():
                         f"DRY_RUN: {DRY_RUN}"
                     ]
                 )
+                send_email_step(
+                    "매수 체결 완료",
+                    [
+                        f"매수 종목: {target_symbol}",
+                        f"주문번호: {buy_result['order_id']}",
+                        f"체결수량: {fill_result['filled_qty']}",
+                        f"평균체결가: {fill_result['avg_price']}",
+                        f"사용 가능 금액: {new_funds}",
+                        f"DRY_RUN: {DRY_RUN}"
+                    ]
+                )
 
     except Exception as e:
         log(f"❌ 에러 발생: {e}")
         action_summary = f"ERROR: {str(e)}"
         notify_error(str(e), target_name, current_symbol)
+        send_email_error(str(e), target_name, current_symbol)
 
     finally:
         client.disconnect()
@@ -277,8 +343,18 @@ def main():
                 f"DRY_RUN: {DRY_RUN}"
             ]
         )
-
         send_telegram_message(message)
+
+        email_body = format_email_body(
+            "자동매매 실행 결과",
+            [
+                f"추천 종목: {target_name}",
+                f"현재 보유: {current_symbol}",
+                f"실행 결과: {action_summary}",
+                f"DRY_RUN: {DRY_RUN}"
+            ]
+        )
+        send_email("자동매매 실행 결과", email_body)
 
 
 if __name__ == "__main__":
