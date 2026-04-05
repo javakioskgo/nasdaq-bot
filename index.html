@@ -1,145 +1,252 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>국내 / 해외 ETF 추천 시그널</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#0b1020; color:#e5e7eb; margin:0; padding:24px; }
-    .container { max-width:1200px; margin:0 auto; }
-    .card { background:#131a2a; border-radius:20px; padding:20px; margin-bottom:20px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:20px; }
-    .title { font-size:34px; font-weight:800; margin-bottom:8px; }
-    .sub { color:#9ca3af; margin:6px 0; }
-    .badge { display:inline-block; background:#062b49; color:#7dd3fc; padding:14px 20px; border-radius:999px; font-size:28px; font-weight:800; margin-top:12px; }
-    .section-title { font-size:28px; font-weight:800; margin-bottom:10px; }
-    .reason { background:#0b1a33; border-radius:16px; padding:16px; line-height:1.6; margin:14px 0; }
-    .metric-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
-    .metric { border:1px solid #374151; border-radius:16px; padding:16px; }
-    .metric .label { color:#9ca3af; margin-bottom:8px; }
-    .metric .value { font-size:24px; font-weight:800; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ETF Signal</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #070d1f;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #111827;
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.sub {
+  color: #9ca3af;
+  margin: 4px 0;
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+/* ===== TOP PICK ===== */
+
+.top-pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.top-pick-box {
+  border-radius: 22px;
+  padding: 24px;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+
+.pick-label {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.pick-value {
+  font-size: 42px;
+  font-weight: 900;
+  color: #22d3ee;
+  margin-bottom: 10px;
+}
+
+.pick-value.cash {
+  color: #f87171;
+}
+
+.pick-date {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* ===== REASON ===== */
+
+.reason {
+  background: #0b1a33;
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 12px;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+/* ===== METRIC ===== */
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.metric {
+  border: 1px solid #374151;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.metric .label {
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+
+.metric .value {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+  .top-pick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pick-value {
+    font-size: 34px;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
+<div class="container">
+
   <div class="card">
-    <div class="title" id="page-title">국내 / 해외 ETF 추천 시그널</div>
+    <div class="title" id="page-title"></div>
     <div class="sub" id="generated-at"></div>
     <div class="sub" id="page-notice"></div>
   </div>
 
-  <!-- 최상단 추천 카드 -->
-  <div class="card hero-card">
+  <!-- 🔥 TOP PICK -->
+  <div class="card">
     <div class="section-title">오늘 추천</div>
 
     <div class="top-pick-grid">
-      <div class="top-pick-box domestic">
+      <div class="top-pick-box">
         <div class="pick-label">국내 ETF</div>
         <div class="pick-value" id="domestic-top-pick">-</div>
-        <div class="pick-date" id="domestic-top-date">-</div>
+        <div class="pick-date" id="domestic-top-date"></div>
       </div>
 
-      <div class="top-pick-box overseas">
+      <div class="top-pick-box">
         <div class="pick-label">해외 ETF</div>
         <div class="pick-value" id="overseas-top-pick">-</div>
-        <div class="pick-date" id="overseas-top-date">-</div>
+        <div class="pick-date" id="overseas-top-date"></div>
       </div>
     </div>
   </div>
 
-  <!-- 이유 설명 -->
-  <div class="grid">
-    <div class="card" id="domestic-reason-card"></div>
-    <div class="card" id="overseas-reason-card"></div>
-  </div>
+  <!-- 🔥 REASON -->
+  <div class="card" id="domestic-card"></div>
+  <div class="card" id="overseas-card"></div>
+
 </div>
 
-  <script>
-  function metric(label, value) {
-    return `
-      <div class="metric">
-        <div class="label">${label}</div>
-        <div class="value">${value ?? "-"}</div>
-      </div>
-    `;
-  }
+<script>
+function metric(label, value) {
+  return `
+    <div class="metric">
+      <div class="label">${label}</div>
+      <div class="value">${value ?? "-"}</div>
+    </div>
+  `;
+}
 
-  function renderReasonCard(title, market) {
-    if (!market) {
-      return `
-        <div class="section-title">${title}</div>
-        <div class="reason">데이터가 없습니다.</div>
-      `;
-    }
+function renderMarket(title, market) {
+  if (!market) return `<div>데이터 없음</div>`;
 
-    const p = market.primary_review || {};
-    const display = p.display || {};
+  const p = market.primary_review || {};
+  const d = p.display || {};
 
-    return `
-      <div class="section-title">${title}</div>
+  return `
+    <div class="section-title">${title}</div>
 
-      <div class="reason">
-        <strong>선정 이유</strong><br />
-        ${market.reason || "-"}
-      </div>
+    <div class="reason">
+      <strong>선정 이유</strong><br/>
+      ${market.reason}
+    </div>
 
-      <div class="reason">
-        <strong>1차 판단 자산</strong><br />
-        ${(p.display_name || "-")} / ${(p.recommendation || "-")} / ${(p.market_state || "-")}
-      </div>
+    <div class="reason">
+      <strong>판단</strong><br/>
+      ${p.display_name} / ${p.recommendation} / ${p.market_state}
+    </div>
 
-      <div class="metric-grid">
-        ${metric("직전 거래일 종가", display.last_close)}
-        ${metric("직전일 대비", display.daily_return)}
-        ${metric("EMA5", display.ema5)}
-        ${metric("EMA20", display.ema20)}
-        ${metric("EMA5 기울기", display.ema5_slope)}
-        ${metric("EMA20 기울기", display.ema20_slope)}
-      </div>
-    `;
-  }
+    <div class="metric-grid">
+      ${metric("종가", d.last_close)}
+      ${metric("수익률", d.daily_return)}
+      ${metric("EMA5", d.ema5)}
+      ${metric("EMA20", d.ema20)}
+      ${metric("EMA5 기울기", d.ema5_slope)}
+      ${metric("EMA20 기울기", d.ema20_slope)}
+    </div>
+  `;
+}
 
-  fetch("./signal.json?v=" + Date.now())
+fetch("./signal.json?v=" + Date.now())
   .then(r => r.json())
   .then(data => {
 
-    const overseas = data?.markets?.overseas ?? null;
-    const domestic = data?.markets?.domestic ?? null;
+    const domestic = data.markets.domestic;
+    const overseas = data.markets.overseas;
 
-    document.getElementById("page-title").textContent =
-      data.title || "국내 / 해외 ETF 추천 시그널";
+    document.getElementById("page-title").textContent = data.title;
+    document.getElementById("generated-at").textContent = `생성 시각: ${data.generated_at_kst}`;
+    document.getElementById("page-notice").textContent = data.page_notice;
 
-    document.getElementById("generated-at").textContent =
-      `생성 시각: ${data.generated_at_kst || "-"}`;
+    // 🔥 TOP PICK
+    const domVal = domestic.signal_display_name;
+    const domEl = document.getElementById("domestic-top-pick");
+    domEl.textContent = domVal;
 
-    document.getElementById("page-notice").textContent =
-      data.page_notice || "국내/해외 모두 직전 거래일 마감 기준";
-
-    // 🔥 👉 여기부터 추가
-    document.getElementById("domestic-top-pick").textContent =
-      domestic?.signal_display_name || domestic?.signal || "-";
+    if (domVal === "CASH") domEl.classList.add("cash");
 
     document.getElementById("domestic-top-date").textContent =
-      `기준일: ${domestic?.signal_date || "-"} (직전 거래일 마감 기준)`;
+      `기준일: ${domestic.signal_date}`;
 
-    document.getElementById("overseas-top-pick").textContent =
-      overseas?.signal_display_name || overseas?.signal || "-";
+    const overVal = overseas.signal_display_name;
+    const overEl = document.getElementById("overseas-top-pick");
+    overEl.textContent = overVal;
+
+    if (overVal === "CASH") overEl.classList.add("cash");
 
     document.getElementById("overseas-top-date").textContent =
-      `기준일: ${overseas?.signal_date || "-"} (직전 거래일 마감 기준)`;
-    // 🔥 👉 여기까지
+      `기준일: ${overseas.signal_date}`;
 
-    // 아래는 기존 이유 카드 렌더링
-    document.getElementById("domestic-reason-card").innerHTML =
-      renderReasonCard("국내 ETF 이유 설명", domestic);
+    // 🔥 REASON
+    document.getElementById("domestic-card").innerHTML =
+      renderMarket("국내 ETF 이유 설명", domestic);
 
-    document.getElementById("overseas-reason-card").innerHTML =
-      renderReasonCard("해외 ETF 이유 설명", overseas);
-
+    document.getElementById("overseas-card").innerHTML =
+      renderMarket("해외 ETF 이유 설명", overseas);
   })
   .catch(err => {
-    document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
+    document.body.innerHTML = `<pre>에러 발생\n${err}</pre>`;
   });
 </script>
+
 </body>
 </html>
