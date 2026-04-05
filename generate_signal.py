@@ -86,14 +86,20 @@ def build_domestic_etf_name_map() -> dict[str, str]:
     if df.empty:
         raise ValueError("FinanceDataReader에서 ETF/KR 목록을 가져오지 못했습니다.")
 
-    # 표준 컬럼명 기대: Code, Name
-    if "Name" not in df.columns or "Code" not in df.columns:
+    # FDR 환경에 따라 Symbol 또는 Code 컬럼명이 다를 수 있음
+    symbol_col = None
+    if "Symbol" in df.columns:
+        symbol_col = "Symbol"
+    elif "Code" in df.columns:
+        symbol_col = "Code"
+
+    if "Name" not in df.columns or symbol_col is None:
         raise ValueError(f"ETF/KR 목록 형식이 예상과 다릅니다. columns={list(df.columns)}")
 
     name_to_code = {}
     for _, row in df.iterrows():
         name = str(row["Name"]).strip()
-        code = str(row["Code"]).strip().zfill(6)
+        code = str(row[symbol_col]).strip().zfill(6)
         if name:
             name_to_code[name] = code
 
@@ -107,7 +113,12 @@ def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
     name_map = build_domestic_etf_name_map()
 
     if etf_name not in name_map:
-        candidates = [name for name in name_map.keys() if etf_name.replace(" ", "") in name.replace(" ", "")]
+        normalized_target = etf_name.replace(" ", "")
+        candidates = [
+            name for name in name_map.keys()
+            if normalized_target in name.replace(" ", "")
+            or name.replace(" ", "") in normalized_target
+        ]
         sample = ", ".join(sorted(candidates[:10]))
         raise ValueError(
             f"국내 ETF 이름 '{etf_name}'을 ETF/KR 목록에서 찾지 못했습니다. "
@@ -117,7 +128,6 @@ def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
     code = name_map[etf_name]
     _domestic_code_cache[etf_name] = code
     return code
-
 
 # =========================
 # 공통 유틸
