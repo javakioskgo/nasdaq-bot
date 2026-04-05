@@ -44,7 +44,8 @@ OVERSEAS_ALT_ASSETS = [
 
 # =========================
 # 국내 전략
-# 이름은 FinanceDataReader의 ETF/KR 종목명과 일치해야 함
+# 국내는 레버리지 없이 분석
+# 이름은 FDR ETF/KR 목록과 일치해야 함
 # =========================
 DOMESTIC_PRIMARY_NAME = "KODEX 미국나스닥100"
 
@@ -86,7 +87,6 @@ def build_domestic_etf_name_map() -> dict[str, str]:
     if df.empty:
         raise ValueError("FinanceDataReader에서 ETF/KR 목록을 가져오지 못했습니다.")
 
-    # FDR 환경에 따라 Symbol 또는 Code 컬럼명이 다를 수 있음
     symbol_col = None
     if "Symbol" in df.columns:
         symbol_col = "Symbol"
@@ -112,24 +112,26 @@ def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
 
     name_map = build_domestic_etf_name_map()
 
-    # 1. 완전 일치
+    # 1) 완전 일치
     if etf_name in name_map:
         code = name_map[etf_name]
         _domestic_code_cache[etf_name] = code
         return code
 
-    # 2. 공백 제거 후 완전 일치
+    # 2) 공백 제거 후 완전 일치
     normalized_target = etf_name.replace(" ", "")
     for name, code in name_map.items():
         if name.replace(" ", "") == normalized_target:
             _domestic_code_cache[etf_name] = code
             return code
 
-    # 3. 부분 일치 후보 중 첫 번째 사용
+    # 3) 부분 일치 후보
     candidates = [
-        (name, code) for name, code in name_map.items()
+        (name, code)
+        for name, code in name_map.items()
         if normalized_target in name.replace(" ", "")
     ]
+
     if len(candidates) == 1:
         matched_name, matched_code = candidates[0]
         print(f"[INFO] 국내 ETF 이름 자동 보정: '{etf_name}' -> '{matched_name}'")
@@ -141,6 +143,7 @@ def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
         f"국내 ETF 이름 '{etf_name}'을 ETF/KR 목록에서 찾지 못했습니다. "
         f"유사 후보: {sample if sample else '없음'}"
     )
+
 
 # =========================
 # 공통 유틸
@@ -166,6 +169,26 @@ def safe_series_close_from_fdr(df: pd.DataFrame) -> pd.Series:
     return close
 
 
+def download_close_series_overseas(symbol: str) -> pd.Series:
+    df = yf.download(
+        symbol,
+        period=DOWNLOAD_PERIOD,
+        interval=DOWNLOAD_INTERVAL,
+        auto_adjust=True,
+        progress=False
+    )
+
+    if df.empty or len(df) < MIN_REQUIRED_BARS:
+        raise ValueError(f"{symbol} 데이터를 충분히 가져오지 못했습니다.")
+
+    close = safe_series_close_from_yf(df)
+
+    if len(close) < MIN_REQUIRED_BARS:
+        raise ValueError(f"{symbol} 유효한 종가 데이터가 충분하지 않습니다.")
+
+    return close
+
+
 def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
     if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
         code = symbol_or_name
@@ -181,40 +204,15 @@ def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
     if df.empty:
         raise ValueError(f"{display_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
 
-    print(df.tail(3))
-
-    close = safe_series_close_from_fdr(df)
-    close = close.tail(180)
-
-    print(f"[DOMESTIC] last_close={close.iloc[-1]}, last_date={close.index[-1]}")
-
-    if len(close) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{display_name} ({code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
-
-    return close
-
-
-def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
-    if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
-        code = symbol_or_name
-        display_name = symbol_or_name
-    else:
-        code = resolve_domestic_etf_code_by_name(symbol_or_name)
-        display_name = symbol_or_name
-
-    df = fdr.DataReader(code)
-
-    if df.empty:
-        raise ValueError(f"{display_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
-
     close = safe_series_close_from_fdr(df)
 
-    # 최근 6개월만 사용
+    # 최근 6개월 수준만 사용
     close = close.tail(180)
 
     if len(close) < MIN_REQUIRED_BARS:
         raise ValueError(f"{display_name} ({code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
 
+    print(f"[DOMESTIC] last_date={close.index[-1].strftime('%Y-%m-%d')}, last_close={close.iloc[-1]}")
     return close
 
 
@@ -366,7 +364,7 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
 
 
 # =========================
-# 자산별 판정
+# 자산 판정 로직
 # =========================
 def evaluate_asset(
     symbol: str,
@@ -396,7 +394,7 @@ def evaluate_asset(
     recommendation = False
     signal = "CASH"
     signal_display_name = "CASH"
-    signal_strength = 0
+    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
 
     name_for_text = metrics["display_name"]
 
