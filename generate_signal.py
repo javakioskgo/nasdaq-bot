@@ -55,9 +55,14 @@ DOMESTIC_ALT_ASSETS = [
         "priority": 1,
     },
     {
+        "base_name": "KODEX 미국S&P500에너지(합성)",
+        "leveraged_name": "KODEX 미국S&P500에너지(합성)",
+        "priority": 2,
+    },
+    {
         "base_name": "KODEX 골드선물(H)",
         "leveraged_name": "KODEX 골드선물(H)",
-        "priority": 2,
+        "priority": 3,
     },
 ]
 
