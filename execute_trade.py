@@ -56,6 +56,18 @@ def main():
 
     log("===== 자동매매 실행 시작 =====")
 
+        if is_already_executed_today():
+        log("⚠️ 오늘은 이미 자동매매가 실행됨. 중복 실행 방지로 종료")
+        notify_step(
+            "자동매매 중복 실행 방지",
+            [
+                "오늘은 이미 자동매매가 실행되었습니다.",
+                "중복 주문 방지를 위해 이번 실행은 종료합니다.",
+                f"DRY_RUN: {DRY_RUN}"
+            ]
+        )
+        return
+
     signal_data = load_signal()
     target_symbol, target_name = extract_target_signal(signal_data)
 
@@ -226,6 +238,17 @@ def main():
         client.disconnect()
 
         log("===== 자동매매 종료 =====")
+
+        status = "SUCCESS"
+        if action_summary.startswith("ERROR") or "실패" in action_summary:
+            status = "FAILED"
+
+        mark_execution(
+            status=status,
+            target_symbol=target_symbol,
+            current_symbol=current_symbol,
+            action_summary=action_summary,
+        )
 
         message = format_message(
             "자동매매 실행 결과",
