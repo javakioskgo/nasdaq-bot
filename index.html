@@ -5,102 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>국내 / 해외 ETF 추천 시그널</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 24px;
-      background: #f5f7fb;
-      color: #1f2937;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .header-card, .market-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 20px;
-    }
-    .title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .sub {
-      color: #6b7280;
-      font-size: 14px;
-    }
-    .section-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .hero {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 16px 0;
-    }
-    .badge {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: #eef2ff;
-      color: #3730a3;
-      font-weight: 700;
-    }
-    .reason-box {
-      background: #f9fafb;
-      border-left: 4px solid #2563eb;
-      padding: 14px;
-      border-radius: 10px;
-      margin-top: 12px;
-      line-height: 1.6;
-    }
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .metric {
-      background: #f9fafb;
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .metric .label {
-      color: #6b7280;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-    .metric .value {
-      font-weight: 700;
-      font-size: 18px;
-    }
-    .small {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 8px;
-    }
+    body { font-family: Arial, sans-serif; background:#0b1020; color:#e5e7eb; margin:0; padding:24px; }
+    .container { max-width:1200px; margin:0 auto; }
+    .card { background:#131a2a; border-radius:20px; padding:20px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:20px; }
+    .title { font-size:34px; font-weight:800; margin-bottom:8px; }
+    .sub { color:#9ca3af; margin:6px 0; }
+    .badge { display:inline-block; background:#062b49; color:#7dd3fc; padding:14px 20px; border-radius:999px; font-size:28px; font-weight:800; margin-top:12px; }
+    .section-title { font-size:28px; font-weight:800; margin-bottom:10px; }
+    .reason { background:#0b1a33; border-radius:16px; padding:16px; line-height:1.6; margin:14px 0; }
+    .metric-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .metric { border:1px solid #374151; border-radius:16px; padding:16px; }
+    .metric .label { color:#9ca3af; margin-bottom:8px; }
+    .metric .value { font-size:24px; font-weight:800; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header-card">
+    <div class="card">
       <div class="title" id="page-title">국내 / 해외 ETF 추천 시그널</div>
       <div class="sub" id="generated-at"></div>
       <div class="sub" id="page-notice"></div>
     </div>
 
     <div class="grid">
-      <div class="market-card" id="overseas-card"></div>
-      <div class="market-card" id="domestic-card"></div>
+      <div class="card" id="overseas-card"></div>
+      <div class="card" id="domestic-card"></div>
     </div>
   </div>
 
@@ -115,45 +45,38 @@
     }
 
     function renderMarket(title, market) {
-      const primary = market.primary_review;
+      const p = market.primary_review;
       return `
         <div class="section-title">${title}</div>
-        <div class="small">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
+        <div class="sub">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
+        <div class="badge">오늘 대응: ${market.signal_display_name}</div>
 
-        <div class="hero">
-          <div class="badge">오늘 추천: ${market.signal_display_name}</div>
-          <div class="badge">상태: ${market.final_market_state}</div>
-        </div>
-
-        <div class="reason-box">
-          <strong>선정 이유</strong><br/>
+        <div class="reason">
+          <strong>선정 이유</strong><br />
           ${market.reason}
         </div>
 
-        <div class="reason-box">
-          <strong>1차 판단 자산</strong><br/>
-          ${primary.display_name} / 판정: ${primary.recommendation} / 상태: ${primary.market_state}
+        <div class="reason">
+          <strong>1차 판단 자산</strong><br />
+          ${p.display_name} / ${p.recommendation} / ${p.market_state}
         </div>
 
         <div class="metric-grid">
-          ${metric("종가", primary.display.last_close)}
-          ${metric("일간수익률", primary.display.daily_return)}
-          ${metric("EMA5", primary.display.ema5)}
-          ${metric("EMA20", primary.display.ema20)}
-          ${metric("EMA5 기울기", primary.display.ema5_slope)}
-          ${metric("EMA20 기울기", primary.display.ema20_slope)}
+          ${metric("직전 거래일 종가", p.display.last_close)}
+          ${metric("직전일 대비", p.display.daily_return)}
+          ${metric("EMA5", p.display.ema5)}
+          ${metric("EMA20", p.display.ema20)}
+          ${metric("EMA5 기울기", p.display.ema5_slope)}
+          ${metric("EMA20 기울기", p.display.ema20_slope)}
         </div>
-
-        <div class="small">트리거: ${market.final_trigger}</div>
       `;
     }
 
     fetch("./signal.json")
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
         document.getElementById("page-title").textContent = data.title;
-        document.getElementById("generated-at").textContent =
-          `생성 시각: ${data.generated_at_kst}`;
+        document.getElementById("generated-at").textContent = `생성 시각: ${data.generated_at_kst}`;
         document.getElementById("page-notice").textContent = data.page_notice;
 
         document.getElementById("overseas-card").innerHTML =
