@@ -167,6 +167,19 @@ body {
 </div>
 
 <script>
+
+/* 🔥 상태 한글 변환 */
+function translateMarketState(state) {
+  if (state === "UPTREND_RECOVERY") return "상승 추세";
+  if (state === "EARLY_UPTREND") return "초기 상승";
+  if (state === "DOWNTREND_CONFIRMED") return "하락 추세";
+  if (state === "SIDEWAYS") return "횡보";
+  if (state === "EMERGENCY_EXIT") return "긴급 이탈";
+  if (state === "UNCLEAR") return "불명확";
+  return state || "-";
+}
+
+/* 카드 metric */
 function metric(label, value) {
   return `
     <div class="metric">
@@ -176,6 +189,7 @@ function metric(label, value) {
   `;
 }
 
+/* 하단 카드 렌더링 */
 function renderMarket(title, market) {
   if (!market) return `<div>데이터 없음</div>`;
 
@@ -192,7 +206,7 @@ function renderMarket(title, market) {
 
     <div class="reason">
       <strong>판단</strong><br/>
-      ${p.display_name} / ${p.recommendation} / ${p.market_state}
+      ${p.display_name} / ${p.recommendation} / ${translateMarketState(p.market_state)}
     </div>
 
     <div class="metric-grid">
@@ -206,6 +220,7 @@ function renderMarket(title, market) {
   `;
 }
 
+/* 데이터 로드 */
 fetch("./signal.json?v=" + Date.now())
   .then(r => r.json())
   .then(data => {
@@ -214,10 +229,12 @@ fetch("./signal.json?v=" + Date.now())
     const overseas = data.markets.overseas;
 
     document.getElementById("page-title").textContent = data.title;
-    document.getElementById("generated-at").textContent = `생성 시각: ${data.generated_at_kst}`;
-    document.getElementById("page-notice").textContent = data.page_notice;
+    document.getElementById("generated-at").textContent =
+      `생성 시각: ${data.generated_at_kst}`;
+    document.getElementById("page-notice").textContent =
+      data.page_notice;
 
-    // 🔥 TOP PICK
+    /* TOP PICK */
     const domVal = domestic.signal_display_name;
     const domEl = document.getElementById("domestic-top-pick");
     domEl.textContent = domVal;
@@ -236,7 +253,7 @@ fetch("./signal.json?v=" + Date.now())
     document.getElementById("overseas-top-date").textContent =
       `기준일: ${overseas.signal_date}`;
 
-    // 🔥 REASON
+    /* REASON */
     document.getElementById("domestic-card").innerHTML =
       renderMarket("국내 ETF 이유 설명", domestic);
 
@@ -246,6 +263,7 @@ fetch("./signal.json?v=" + Date.now())
   .catch(err => {
     document.body.innerHTML = `<pre>에러 발생\n${err}</pre>`;
   });
+
 </script>
 
 </body>
