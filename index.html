@@ -35,59 +35,66 @@
   </div>
 
   <script>
-    function metric(label, value) {
-      return `
-        <div class="metric">
-          <div class="label">${label}</div>
-          <div class="value">${value}</div>
-        </div>
-      `;
-    }
+  function metric(label, value) {
+    return `
+      <div class="metric">
+        <div class="label">${label}</div>
+        <div class="value">${value}</div>
+      </div>
+    `;
+  }
 
-    function renderMarket(title, market) {
-      const p = market.primary_review;
-      return `
-        <div class="section-title">${title}</div>
-        <div class="sub">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
-        <div class="badge">오늘 대응: ${market.signal_display_name}</div>
+  function renderMarket(title, market) {
+    const p = market.primary_review;
+    return `
+      <div class="section-title">${title}</div>
+      <div class="sub">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
+      <div class="badge">오늘 대응: ${market.signal_display_name}</div>
 
-        <div class="reason">
-          <strong>선정 이유</strong><br />
-          ${market.reason}
-        </div>
+      <div class="reason">
+        <strong>선정 이유</strong><br />
+        ${market.reason}
+      </div>
 
-        <div class="reason">
-          <strong>1차 판단 자산</strong><br />
-          ${p.display_name} / ${p.recommendation} / ${p.market_state}
-        </div>
+      <div class="reason">
+        <strong>1차 판단 자산</strong><br />
+        ${p.display_name} / ${p.recommendation} / ${p.market_state}
+      </div>
 
-        <div class="metric-grid">
-          ${metric("직전 거래일 종가", p.display.last_close)}
-          ${metric("직전일 대비", p.display.daily_return)}
-          ${metric("EMA5", p.display.ema5)}
-          ${metric("EMA20", p.display.ema20)}
-          ${metric("EMA5 기울기", p.display.ema5_slope)}
-          ${metric("EMA20 기울기", p.display.ema20_slope)}
-        </div>
-      `;
-    }
+      <div class="metric-grid">
+        ${metric("직전 거래일 종가", p.display.last_close)}
+        ${metric("직전일 대비", p.display.daily_return)}
+        ${metric("EMA5", p.display.ema5)}
+        ${metric("EMA20", p.display.ema20)}
+        ${metric("EMA5 기울기", p.display.ema5_slope)}
+        ${metric("EMA20 기울기", p.display.ema20_slope)}
+      </div>
+    `;
+  }
 
-    fetch("./signal.json")
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById("page-title").textContent = data.title;
-        document.getElementById("generated-at").textContent = `생성 시각: ${data.generated_at_kst}`;
-        document.getElementById("page-notice").textContent = data.page_notice;
+  fetch("./signal.json")
+    .then(r => r.json())
+    .then(data => {
+      console.log("signal.json:", data);
 
-        document.getElementById("overseas-card").innerHTML =
-          renderMarket("해외 ETF", data.markets.overseas);
+      if (!data.markets || !data.markets.overseas || !data.markets.domestic) {
+        throw new Error("signal.json 구조가 예상과 다릅니다.");
+      }
 
-        document.getElementById("domestic-card").innerHTML =
-          renderMarket("국내 ETF", data.markets.domestic);
-      })
-      .catch(err => {
-        document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
-      });
-  </script>
+      document.getElementById("page-title").textContent = data.title;
+      document.getElementById("generated-at").textContent =
+        `생성 시각: ${data.generated_at_kst}`;
+      document.getElementById("page-notice").textContent = data.page_notice;
+
+      document.getElementById("overseas-card").innerHTML =
+        renderMarket("해외 ETF", data.markets.overseas);
+
+      document.getElementById("domestic-card").innerHTML =
+        renderMarket("국내 ETF", data.markets.domestic);
+    })
+    .catch(err => {
+      document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
+    });
+</script>
 </body>
 </html>
