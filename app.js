@@ -8,7 +8,7 @@ async function loadSignal() {
 
   // 상단 기본 정보
   document.getElementById('today-date').textContent = `오늘 날짜: ${data.today_date}`;
-  document.getElementById('signal-date').textContent = `기준일: ${data.signal_date} (전일 마감 기준)`;
+  document.getElementById('signal-date').textContent = `기준일: ${data.signal_date} (직전일 마감 기준)`;
 
   // 최종 판단
   document.getElementById('reason').textContent = data.reason || '-';
