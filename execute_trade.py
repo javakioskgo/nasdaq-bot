@@ -5,7 +5,7 @@ from datetime import datetime
 
 from config import DRY_RUN
 from ibkr_client import IBKRClient
-
+from state_manager import is_already_executed_today, mark_execution
 
 def log(msg):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
