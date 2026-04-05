@@ -63,7 +63,7 @@
     `;
   }
 
-  function renderMarket(title, market) {
+  function renderReasonCard(title, market) {
     if (!market) {
       return `
         <div class="section-title">${title}</div>
@@ -76,8 +76,6 @@
 
     return `
       <div class="section-title">${title}</div>
-      <div class="sub">기준일: ${market.signal_date || "-"} (직전 거래일 마감 기준)</div>
-      <div class="badge">오늘 대응: ${market.signal_display_name || market.signal || "-"}</div>
 
       <div class="reason">
         <strong>선정 이유</strong><br />
@@ -103,28 +101,11 @@
   fetch("./signal.json?v=" + Date.now())
     .then(async (r) => {
       const text = await r.text();
-      console.log("raw signal.json text:", text);
-
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error("signal.json이 JSON 형식이 아닙니다.");
-      }
+      return JSON.parse(text);
     })
     .then((data) => {
-      console.log("parsed signal.json:", data);
-      console.log("top-level keys:", Object.keys(data || {}));
-
-      // 새 구조
-      const overseas = data?.markets?.overseas ?? data?.overseas ?? null;
-      const domestic = data?.markets?.domestic ?? data?.domestic ?? null;
-
-      if (!overseas && !domestic) {
-        throw new Error(
-          "signal.json 구조가 예상과 다릅니다. top-level keys = " +
-          JSON.stringify(Object.keys(data || {}))
-        );
-      }
+      const overseas = data?.markets?.overseas ?? null;
+      const domestic = data?.markets?.domestic ?? null;
 
       document.getElementById("page-title").textContent =
         data.title || "국내 / 해외 ETF 추천 시그널";
@@ -135,11 +116,23 @@
       document.getElementById("page-notice").textContent =
         data.page_notice || "국내/해외 모두 직전 거래일 마감 기준";
 
-      document.getElementById("overseas-card").innerHTML =
-        renderMarket("해외 ETF", overseas);
+      // 최상단 추천 카드
+      document.getElementById("domestic-top-pick").textContent =
+        domestic?.signal_display_name || domestic?.signal || "-";
+      document.getElementById("domestic-top-date").textContent =
+        `기준일: ${domestic?.signal_date || "-"} (직전 거래일 마감 기준)`;
 
-      document.getElementById("domestic-card").innerHTML =
-        renderMarket("국내 ETF", domestic);
+      document.getElementById("overseas-top-pick").textContent =
+        overseas?.signal_display_name || overseas?.signal || "-";
+      document.getElementById("overseas-top-date").textContent =
+        `기준일: ${overseas?.signal_date || "-"} (직전 거래일 마감 기준)`;
+
+      // 하단 이유 설명 카드
+      document.getElementById("domestic-reason-card").innerHTML =
+        renderReasonCard("국내 ETF 이유 설명", domestic);
+
+      document.getElementById("overseas-reason-card").innerHTML =
+        renderReasonCard("해외 ETF 이유 설명", overseas);
     })
     .catch((err) => {
       document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
