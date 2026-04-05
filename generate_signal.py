@@ -15,18 +15,32 @@ DOWNLOAD_INTERVAL = "1d"
 MIN_REQUIRED_BARS = 25
 CHART_BARS = 60
 
-EMA_FAST_SPAN = 5
-EMA_SLOW_SPAN = 20
-
 EMERGENCY_DROP_PCT = -0.03
 SIDEWAYS_SLOPE_PCT_THRESHOLD = 0.0005
 SIDEWAYS_DISTANCE_THRESHOLD = 0.02
-
 DOWN_ACCEL_RATIO = 1.5
-ABOVE_CONFIRM_BARS = 2
-BELOW_CONFIRM_BARS = 2
-BELOW_LOOKBACK_BARS = 5
-BELOW_REQUIRED_COUNT = 3
+
+
+# =========================
+# 해외 전략 파라미터 (백테스트 최적값 반영)
+# =========================
+OVERSEAS_EMA_FAST_SPAN = 5
+OVERSEAS_EMA_SLOW_SPAN = 25
+OVERSEAS_ABOVE_CONFIRM_BARS = 4
+OVERSEAS_BELOW_CONFIRM_BARS = 2
+OVERSEAS_BELOW_LOOKBACK_BARS = 5
+OVERSEAS_BELOW_REQUIRED_COUNT = 3
+
+
+# =========================
+# 국내 전략 파라미터 (백테스트 최적값 반영)
+# =========================
+DOMESTIC_EMA_FAST_SPAN = 10
+DOMESTIC_EMA_SLOW_SPAN = 50
+DOMESTIC_ABOVE_CONFIRM_BARS = 5
+DOMESTIC_BELOW_CONFIRM_BARS = 3
+DOMESTIC_BELOW_LOOKBACK_BARS = 7
+DOMESTIC_BELOW_REQUIRED_COUNT = 4
 
 
 # =========================
@@ -73,6 +87,33 @@ DOMESTIC_ALT_ASSETS = [
 # =========================
 def get_now_kst() -> datetime:
     return datetime.now(ZoneInfo("Asia/Seoul"))
+
+
+# =========================
+# 시장별 파라미터 유틸
+# =========================
+def get_market_params(market_type: str) -> dict:
+    if market_type == "OVERSEAS":
+        return {
+            "EMA_FAST_SPAN": OVERSEAS_EMA_FAST_SPAN,
+            "EMA_SLOW_SPAN": OVERSEAS_EMA_SLOW_SPAN,
+            "ABOVE_CONFIRM_BARS": OVERSEAS_ABOVE_CONFIRM_BARS,
+            "BELOW_CONFIRM_BARS": OVERSEAS_BELOW_CONFIRM_BARS,
+            "BELOW_LOOKBACK_BARS": OVERSEAS_BELOW_LOOKBACK_BARS,
+            "BELOW_REQUIRED_COUNT": OVERSEAS_BELOW_REQUIRED_COUNT,
+        }
+
+    if market_type == "DOMESTIC":
+        return {
+            "EMA_FAST_SPAN": DOMESTIC_EMA_FAST_SPAN,
+            "EMA_SLOW_SPAN": DOMESTIC_EMA_SLOW_SPAN,
+            "ABOVE_CONFIRM_BARS": DOMESTIC_ABOVE_CONFIRM_BARS,
+            "BELOW_CONFIRM_BARS": DOMESTIC_BELOW_CONFIRM_BARS,
+            "BELOW_LOOKBACK_BARS": DOMESTIC_BELOW_LOOKBACK_BARS,
+            "BELOW_REQUIRED_COUNT": DOMESTIC_BELOW_REQUIRED_COUNT,
+        }
+
+    raise ValueError(f"지원하지 않는 market_type: {market_type}")
 
 
 # =========================
@@ -217,21 +258,23 @@ def download_close_series(symbol: str, market_type: str) -> pd.Series:
     raise ValueError(f"지원하지 않는 market_type: {market_type}")
 
 
-def build_chart_data(close: pd.Series) -> dict:
+def build_chart_data(close: pd.Series, market_type: str) -> dict:
+    params = get_market_params(market_type)
+
     recent_close = close.tail(CHART_BARS)
-    ema5_recent = recent_close.ewm(span=EMA_FAST_SPAN, adjust=False).mean()
-    ema20_recent = recent_close.ewm(span=EMA_SLOW_SPAN, adjust=False).mean()
+    ema_fast_recent = recent_close.ewm(span=params["EMA_FAST_SPAN"], adjust=False).mean()
+    ema_slow_recent = recent_close.ewm(span=params["EMA_SLOW_SPAN"], adjust=False).mean()
 
     labels = [pd.to_datetime(idx).strftime("%m-%d") for idx in recent_close.index]
     close_data = [round(float(v), 2) for v in recent_close]
-    ema5_data = [round(float(v), 2) for v in ema5_recent]
-    ema20_data = [round(float(v), 2) for v in ema20_recent]
+    ema_fast_data = [round(float(v), 2) for v in ema_fast_recent]
+    ema_slow_data = [round(float(v), 2) for v in ema_slow_recent]
 
     return {
         "labels": labels,
         "close_data": close_data,
-        "ema5_data": ema5_data,
-        "ema20_data": ema20_data
+        "ema5_data": ema_fast_data,
+        "ema20_data": ema_slow_data
     }
 
 
@@ -239,12 +282,13 @@ def build_chart_data(close: pd.Series) -> dict:
 # 지표 계산
 # =========================
 def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | None = None) -> dict:
+    params = get_market_params(market_type)
     close = download_close_series(symbol, market_type)
 
-    ema5 = close.ewm(span=EMA_FAST_SPAN, adjust=False).mean()
-    ema20 = close.ewm(span=EMA_SLOW_SPAN, adjust=False).mean()
-    ema5_slope = ema5.diff()
-    ema20_slope = ema20.diff()
+    ema_fast = close.ewm(span=params["EMA_FAST_SPAN"], adjust=False).mean()
+    ema_slow = close.ewm(span=params["EMA_SLOW_SPAN"], adjust=False).mean()
+    ema_fast_slope = ema_fast.diff()
+    ema_slow_slope = ema_slow.diff()
     daily_return = close.pct_change()
 
     last_idx = close.index[-1]
@@ -254,40 +298,40 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
     prev_close = float(close.iloc[-2])
     last_daily_return = float(daily_return.iloc[-1])
 
-    last_ema5 = float(ema5.iloc[-1])
-    prev_ema5 = float(ema5.iloc[-2])
-    last_ema20 = float(ema20.iloc[-1])
-    prev_ema20 = float(ema20.iloc[-2])
+    last_ema_fast = float(ema_fast.iloc[-1])
+    prev_ema_fast = float(ema_fast.iloc[-2])
+    last_ema_slow = float(ema_slow.iloc[-1])
+    prev_ema_slow = float(ema_slow.iloc[-2])
 
-    last_ema5_slope = float(ema5_slope.iloc[-1])
-    last_ema20_slope = float(ema20_slope.iloc[-1])
+    last_ema_fast_slope = float(ema_fast_slope.iloc[-1])
+    last_ema_slow_slope = float(ema_slow_slope.iloc[-1])
 
-    ema5_slope_pct = last_ema5_slope / prev_ema5 if prev_ema5 != 0 else 0.0
-    ema20_slope_pct = last_ema20_slope / prev_ema20 if prev_ema20 != 0 else 0.0
+    ema_fast_slope_pct = last_ema_fast_slope / prev_ema_fast if prev_ema_fast != 0 else 0.0
+    ema_slow_slope_pct = last_ema_slow_slope / prev_ema_slow if prev_ema_slow != 0 else 0.0
 
-    recent_above_close = close.iloc[-ABOVE_CONFIRM_BARS:]
-    recent_above_ema20 = ema20.iloc[-ABOVE_CONFIRM_BARS:]
-    cond_above_n = bool((recent_above_close > recent_above_ema20).all())
+    recent_above_close = close.iloc[-params["ABOVE_CONFIRM_BARS"]:]
+    recent_above_ema_slow = ema_slow.iloc[-params["ABOVE_CONFIRM_BARS"]:]
+    cond_above_n = bool((recent_above_close > recent_above_ema_slow).all())
 
-    recent_below_close = close.iloc[-BELOW_CONFIRM_BARS:]
-    recent_below_ema20 = ema20.iloc[-BELOW_CONFIRM_BARS:]
-    cond_below_n = bool((recent_below_close < recent_below_ema20).all())
+    recent_below_close = close.iloc[-params["BELOW_CONFIRM_BARS"]:]
+    recent_below_ema_slow = ema_slow.iloc[-params["BELOW_CONFIRM_BARS"]:]
+    cond_below_n = bool((recent_below_close < recent_below_ema_slow).all())
 
-    recent_lookback_close = close.iloc[-BELOW_LOOKBACK_BARS:]
-    recent_lookback_ema20 = ema20.iloc[-BELOW_LOOKBACK_BARS:]
-    below_lookback_count = int((recent_lookback_close <= recent_lookback_ema20).sum())
+    recent_lookback_close = close.iloc[-params["BELOW_LOOKBACK_BARS"]:]
+    recent_lookback_ema_slow = ema_slow.iloc[-params["BELOW_LOOKBACK_BARS"]:]
+    below_lookback_count = int((recent_lookback_close <= recent_lookback_ema_slow).sum())
 
-    cond_ema_cross = last_ema5 > last_ema20
-    cond_ema20_up = last_ema20_slope > 0
-    cond_ema5_up = last_ema5_slope > 0
-    cond_ema20_down = last_ema20_slope < 0
-    cond_ema5_down = last_ema5_slope < 0
+    cond_ema_cross = last_ema_fast > last_ema_slow
+    cond_ema20_up = last_ema_slow_slope > 0
+    cond_ema5_up = last_ema_fast_slope > 0
+    cond_ema20_down = last_ema_slow_slope < 0
+    cond_ema5_down = last_ema_fast_slope < 0
     cond_emergency_exit = last_daily_return <= EMERGENCY_DROP_PCT
-    cond_below_lookback_required = below_lookback_count >= BELOW_REQUIRED_COUNT
+    cond_below_lookback_required = below_lookback_count >= params["BELOW_REQUIRED_COUNT"]
 
-    ema20_strength_abs = abs(last_ema20_slope)
-    ema20_strength_pct = abs(ema20_slope_pct)
-    price_distance = abs(last_close - last_ema20) / last_ema20 if last_ema20 != 0 else 0.0
+    ema20_strength_abs = abs(last_ema_slow_slope)
+    ema20_strength_pct = abs(ema_slow_slope_pct)
+    price_distance = abs(last_close - last_ema_slow) / last_ema_slow if last_ema_slow != 0 else 0.0
 
     is_sideways = (
         ema20_strength_pct < SIDEWAYS_SLOPE_PCT_THRESHOLD and
@@ -295,8 +339,8 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
     )
 
     down_acceleration_ratio = (
-        abs(last_ema5_slope) / abs(last_ema20_slope)
-        if abs(last_ema20_slope) > 0 else None
+        abs(last_ema_fast_slope) / abs(last_ema_slow_slope)
+        if abs(last_ema_slow_slope) > 0 else None
     )
     cond_down_acceleration = (
         down_acceleration_ratio is not None and
@@ -308,19 +352,19 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
         "display_name": display_name if display_name else symbol,
         "signal_date": signal_date,
         "close": close,
-        "chart_data": build_chart_data(close),
+        "chart_data": build_chart_data(close, market_type),
         "latest_price_info": {
             "last_close_raw": round(last_close, 2),
             "prev_close_raw": round(prev_close, 2),
             "daily_return_pct_raw": round(last_daily_return * 100, 2)
         },
         "latest_indicator_info": {
-            "ema5_raw": round(last_ema5, 4),
-            "ema20_raw": round(last_ema20, 4),
-            "ema5_slope_raw": round(last_ema5_slope, 6),
-            "ema20_slope_raw": round(last_ema20_slope, 6),
-            "ema5_slope_pct": round(ema5_slope_pct * 100, 4),
-            "ema20_slope_pct": round(ema20_slope_pct * 100, 4)
+            "ema5_raw": round(last_ema_fast, 4),
+            "ema20_raw": round(last_ema_slow, 4),
+            "ema5_slope_raw": round(last_ema_fast_slope, 6),
+            "ema20_slope_raw": round(last_ema_slow_slope, 6),
+            "ema5_slope_pct": round(ema_fast_slope_pct * 100, 4),
+            "ema20_slope_pct": round(ema_slow_slope_pct * 100, 4)
         },
         "condition_values": {
             "ema20_strength_abs": round(ema20_strength_abs, 6),
@@ -345,12 +389,12 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
         "display": {
             "last_close": f"{last_close:,.2f}",
             "daily_return": f"{last_daily_return * 100:+.2f}%",
-            "ema5": f"{last_ema5:,.2f}",
-            "ema20": f"{last_ema20:,.2f}",
-            "ema5_slope": f"{last_ema5_slope:+.4f}",
-            "ema20_slope": f"{last_ema20_slope:+.4f}",
-            "ema5_slope_pct": f"{ema5_slope_pct * 100:+.4f}%",
-            "ema20_slope_pct": f"{ema20_slope_pct * 100:+.4f}%",
+            "ema5": f"{last_ema_fast:,.2f}",
+            "ema20": f"{last_ema_slow:,.2f}",
+            "ema5_slope": f"{last_ema_fast_slope:+.4f}",
+            "ema20_slope": f"{last_ema_slow_slope:+.4f}",
+            "ema5_slope_pct": f"{ema_fast_slope_pct * 100:+.4f}%",
+            "ema20_slope_pct": f"{ema_slow_slope_pct * 100:+.4f}%",
             "price_distance_pct": f"{price_distance * 100:.2f}%"
         }
     }
@@ -367,6 +411,7 @@ def evaluate_asset(
     display_name: str | None = None,
     leveraged_display_name: str | None = None,
 ) -> dict:
+    params = get_market_params(market_type)
     metrics = calculate_asset_metrics(symbol, market_type, display_name=display_name)
     conditions = metrics["conditions"]
 
@@ -387,7 +432,7 @@ def evaluate_asset(
     recommendation = False
     signal = "CASH"
     signal_display_name = "CASH"
-    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
+    signal_strength = 0
 
     name_for_text = metrics["display_name"]
 
@@ -407,8 +452,8 @@ def evaluate_asset(
         market_state = "DOWNTREND_CONFIRMED"
         reason = (
             "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, "
-            f"20EMA 아래 {BELOW_CONFIRM_BARS}봉 + 최근 {BELOW_LOOKBACK_BARS}봉 중 "
-            f"{BELOW_REQUIRED_COUNT}봉 이상 아래."
+            f"20EMA 아래 {params['BELOW_CONFIRM_BARS']}봉 + 최근 {params['BELOW_LOOKBACK_BARS']}봉 중 "
+            f"{params['BELOW_REQUIRED_COUNT']}봉 이상 아래."
         )
         final_trigger = "📉 하락 전환 확정 → 비추천"
         decision_path.extend([
@@ -429,7 +474,7 @@ def evaluate_asset(
         market_state = "UPTREND_RECOVERY"
         reason = (
             "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, "
-            f"종가가 20EMA 위 {ABOVE_CONFIRM_BARS}봉 연속입니다."
+            f"종가가 20EMA 위 {params['ABOVE_CONFIRM_BARS']}봉 연속입니다."
         )
         final_trigger = "📈 상승 복귀 확인 → 추천"
         decision_path.extend([
@@ -439,7 +484,9 @@ def evaluate_asset(
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
-        signal_display_name = leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else name_for_text)
+        signal_display_name = leveraged_display_name if leveraged_display_name else (
+            leveraged_symbol if leveraged_symbol else name_for_text
+        )
         signal_strength = 2
 
     elif cond_ema_cross and cond_ema20_up:
@@ -452,7 +499,9 @@ def evaluate_asset(
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
-        signal_display_name = leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else name_for_text)
+        signal_display_name = leveraged_display_name if leveraged_display_name else (
+            leveraged_symbol if leveraged_symbol else name_for_text
+        )
         signal_strength = 1
 
     else:
@@ -473,7 +522,9 @@ def evaluate_asset(
         "symbol": symbol,
         "display_name": metrics["display_name"],
         "leveraged_symbol": leveraged_symbol if leveraged_symbol else symbol,
-        "leveraged_display_name": leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else metrics["display_name"]),
+        "leveraged_display_name": leveraged_display_name if leveraged_display_name else (
+            leveraged_symbol if leveraged_symbol else metrics["display_name"]
+        ),
         "is_primary": is_primary,
         "recommendation": recommendation,
         "signal": signal if recommendation else "CASH",
@@ -727,16 +778,32 @@ def main():
             "domestic": domestic_result
         },
         "strategy_params": {
-            "EMA_FAST_SPAN": EMA_FAST_SPAN,
-            "EMA_SLOW_SPAN": EMA_SLOW_SPAN,
-            "EMERGENCY_DROP_PCT": EMERGENCY_DROP_PCT,
-            "SIDEWAYS_SLOPE_PCT_THRESHOLD": SIDEWAYS_SLOPE_PCT_THRESHOLD,
-            "SIDEWAYS_DISTANCE_THRESHOLD": SIDEWAYS_DISTANCE_THRESHOLD,
-            "DOWN_ACCEL_RATIO": DOWN_ACCEL_RATIO,
-            "ABOVE_CONFIRM_BARS": ABOVE_CONFIRM_BARS,
-            "BELOW_CONFIRM_BARS": BELOW_CONFIRM_BARS,
-            "BELOW_LOOKBACK_BARS": BELOW_LOOKBACK_BARS,
-            "BELOW_REQUIRED_COUNT": BELOW_REQUIRED_COUNT
+            "common": {
+                "DOWNLOAD_PERIOD": DOWNLOAD_PERIOD,
+                "DOWNLOAD_INTERVAL": DOWNLOAD_INTERVAL,
+                "MIN_REQUIRED_BARS": MIN_REQUIRED_BARS,
+                "CHART_BARS": CHART_BARS,
+                "EMERGENCY_DROP_PCT": EMERGENCY_DROP_PCT,
+                "SIDEWAYS_SLOPE_PCT_THRESHOLD": SIDEWAYS_SLOPE_PCT_THRESHOLD,
+                "SIDEWAYS_DISTANCE_THRESHOLD": SIDEWAYS_DISTANCE_THRESHOLD,
+                "DOWN_ACCEL_RATIO": DOWN_ACCEL_RATIO
+            },
+            "overseas": {
+                "EMA_FAST_SPAN": OVERSEAS_EMA_FAST_SPAN,
+                "EMA_SLOW_SPAN": OVERSEAS_EMA_SLOW_SPAN,
+                "ABOVE_CONFIRM_BARS": OVERSEAS_ABOVE_CONFIRM_BARS,
+                "BELOW_CONFIRM_BARS": OVERSEAS_BELOW_CONFIRM_BARS,
+                "BELOW_LOOKBACK_BARS": OVERSEAS_BELOW_LOOKBACK_BARS,
+                "BELOW_REQUIRED_COUNT": OVERSEAS_BELOW_REQUIRED_COUNT
+            },
+            "domestic": {
+                "EMA_FAST_SPAN": DOMESTIC_EMA_FAST_SPAN,
+                "EMA_SLOW_SPAN": DOMESTIC_EMA_SLOW_SPAN,
+                "ABOVE_CONFIRM_BARS": DOMESTIC_ABOVE_CONFIRM_BARS,
+                "BELOW_CONFIRM_BARS": DOMESTIC_BELOW_CONFIRM_BARS,
+                "BELOW_LOOKBACK_BARS": DOMESTIC_BELOW_LOOKBACK_BARS,
+                "BELOW_REQUIRED_COUNT": DOMESTIC_BELOW_REQUIRED_COUNT
+            }
         }
     }
 
