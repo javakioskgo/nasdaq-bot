@@ -31,10 +31,11 @@ def get_current_position_symbol(positions):
 
 
 def main():
+    # 안전 초기값
     target_symbol = "UNKNOWN"
     target_name = "UNKNOWN"
     current_symbol = "UNKNOWN"
-    action_summary = "아직 판단 전"
+    action_summary = "초기 상태"
 
     log("===== 자동매매 실행 시작 =====")
 
@@ -55,42 +56,101 @@ def main():
         log(f"현재 보유: {current_symbol}")
         log(f"매수 가능 금액: ${available_funds}")
 
+        # 1️⃣ 동일 종목 → HOLD
         if current_symbol == target_symbol:
             log("→ 현재 보유 종목과 추천 종목이 같음")
             log("→ 변경 없음 (HOLD)")
-            action_summary = "변경 없음 (HOLD)"
+            action_summary = "HOLD"
 
+        # 2️⃣ 보유 → CASH (전량 매도)
         elif current_symbol != "CASH" and target_symbol == "CASH":
             log(f"→ {current_symbol} 전량 매도 필요")
-            action_summary = f"{current_symbol} 전량 매도 필요"
+            action_summary = f"{current_symbol} → CASH"
 
             if DRY_RUN:
-                log("DRY_RUN 모드: 실제 매도 주문은 실행하지 않음")
+                log("DRY_RUN: 매도 생략")
             else:
                 sell_result = client.sell_all(current_symbol)
                 log(f"매도 주문 접수: {sell_result}")
 
+                fill_result = client.wait_until_filled(sell_result["order_id"])
+
+                if not fill_result["filled"]:
+                    log("❌ 매도 체결 실패 → 중단")
+                    action_summary = "매도 실패"
+                    return
+
+                log("✅ 매도 체결 완료")
+
+        # 3️⃣ CASH → 매수
         elif current_symbol == "CASH" and target_symbol != "CASH":
             log(f"→ {target_symbol} 신규 매수 필요")
-            action_summary = f"{target_symbol} 신규 매수 필요"
+            action_summary = f"CASH → {target_symbol}"
 
             if DRY_RUN:
-                log("DRY_RUN 모드: 실제 매수 주문은 실행하지 않음")
+                log("DRY_RUN: 매수 생략")
             else:
                 buy_result = client.buy_max(target_symbol, available_funds)
                 log(f"매수 주문 접수: {buy_result}")
 
+                fill_result = client.wait_until_filled(buy_result["order_id"])
+
+                if not fill_result["filled"]:
+                    log("❌ 매수 체결 실패")
+                    action_summary = "매수 실패"
+                    return
+
+                log("✅ 매수 체결 완료")
+
+        # 4️⃣ A → B 교체 (핵심)
         else:
-            log(f"→ {current_symbol} 보유 중, 목표 종목은 {target_symbol}")
-            log("→ 기존 종목 매도 후 새 종목 매수 필요")
-            action_summary = f"{current_symbol} 매도 후 {target_symbol} 매수 필요"
+            log(f"→ {current_symbol} → {target_symbol} 교체 필요")
+            action_summary = f"{current_symbol} → {target_symbol}"
 
             if DRY_RUN:
-                log("DRY_RUN 모드: 실제 매도/매수 주문은 실행하지 않음")
+                log("DRY_RUN: 매도/매수 생략")
+
             else:
+                # 🔴 1. 매도
                 sell_result = client.sell_all(current_symbol)
                 log(f"매도 주문 접수: {sell_result}")
-                log("현금 반영 확인 후 매수 진행 예정")
+
+                fill_result = client.wait_until_filled(sell_result["order_id"])
+
+                if not fill_result["filled"]:
+                    log("❌ 매도 체결 실패 → 중단")
+                    action_summary = "매도 실패"
+                    return
+
+                log("✅ 매도 체결 완료")
+
+                # 🔵 2. 현금 반영 확인
+                cash_result = client.wait_until_cash_ready()
+
+                if not cash_result["cash_ready"]:
+                    log("❌ 현금 반영 실패 → 중단")
+                    action_summary = "현금 반영 실패"
+                    return
+
+                new_funds = cash_result["available_funds"]
+                log(f"현금 확인 완료: ${new_funds}")
+
+                # 🟢 3. 매수
+                buy_result = client.buy_max(target_symbol, new_funds)
+                log(f"매수 주문 접수: {buy_result}")
+
+                fill_result = client.wait_until_filled(buy_result["order_id"])
+
+                if not fill_result["filled"]:
+                    log("❌ 매수 체결 실패")
+                    action_summary = "매수 실패"
+                    return
+
+                log("✅ 매수 체결 완료")
+
+    except Exception as e:
+        log(f"❌ 에러 발생: {e}")
+        action_summary = f"ERROR: {str(e)}"
 
     finally:
         client.disconnect()
@@ -102,7 +162,7 @@ def main():
             [
                 f"추천 종목: {target_name}",
                 f"현재 보유: {current_symbol}",
-                f"판단 결과: {action_summary}",
+                f"실행 결과: {action_summary}",
                 f"DRY_RUN: {DRY_RUN}"
             ]
         )
