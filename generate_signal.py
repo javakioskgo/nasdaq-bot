@@ -30,7 +30,7 @@ BELOW_REQUIRED_COUNT = 3
 
 
 # =========================
-# 해외 전략 파라미터
+# 해외 전략
 # =========================
 OVERSEAS_PRIMARY_SYMBOL = "QQQ"
 OVERSEAS_PRIMARY_LEVERAGED_SYMBOL = "TQQQ"
@@ -43,31 +43,25 @@ OVERSEAS_ALT_ASSETS = [
 
 
 # =========================
-# 국내 전략 파라미터
-# 주의: 아래 ETF 코드는 실제 사용 중인 종목코드로 확인 후 유지하세요.
+# 국내 전략
+# 국내는 직전 거래일 마감 기준으로 별도 계산
+# 레버리지 불가 계좌를 감안해 동일 ETF 자체를 추천 대상으로 사용
 # =========================
-DOMESTIC_PRIMARY_SYMBOL = "379800"  # KODEX 미국나스닥100
 DOMESTIC_PRIMARY_NAME = "KODEX 미국나스닥100"
 
 DOMESTIC_ALT_ASSETS = [
     {
-        "base": "381180",  # TIGER 미국필라델피아반도체
         "base_name": "TIGER 미국필라델피아반도체",
-        "leveraged": "381180",
         "leveraged_name": "TIGER 미국필라델피아반도체",
         "priority": 1,
     },
     {
-        "base": "381170",  # TIGER 미국S&P에너지
         "base_name": "TIGER 미국S&P에너지",
-        "leveraged": "381170",
         "leveraged_name": "TIGER 미국S&P에너지",
         "priority": 2,
     },
     {
-        "base": "132030",  # KODEX 골드선물(H)
         "base_name": "KODEX 골드선물(H)",
-        "leveraged": "132030",
         "leveraged_name": "KODEX 골드선물(H)",
         "priority": 3,
     },
@@ -75,12 +69,35 @@ DOMESTIC_ALT_ASSETS = [
 
 
 # =========================
-# 공통 유틸
+# 시간 / 날짜 유틸
 # =========================
 def get_now_kst() -> datetime:
     return datetime.now(ZoneInfo("Asia/Seoul"))
 
 
+def get_recent_krx_business_day_str(lookback_days: int = 14) -> str:
+    now_kst = get_now_kst().date()
+
+    for i in range(lookback_days):
+        day = now_kst - timedelta(days=i)
+        day_str = day.strftime("%Y%m%d")
+        tickers = stock.get_etf_ticker_list(day_str)
+        if tickers:
+            return day_str
+
+    raise ValueError("최근 KRX 거래일을 찾지 못했습니다.")
+
+
+def get_recent_krx_business_range(lookback_days: int = 240) -> tuple[str, str]:
+    now_kst = get_now_kst().date()
+    start = now_kst - timedelta(days=lookback_days)
+    end = now_kst
+    return start.strftime("%Y%m%d"), end.strftime("%Y%m%d")
+
+
+# =========================
+# 공통 유틸
+# =========================
 def safe_series_close_from_yf(df: pd.DataFrame) -> pd.Series:
     close = df["Close"].copy()
     if isinstance(close, pd.DataFrame):
@@ -93,11 +110,25 @@ def safe_series_close_from_pykrx(df: pd.DataFrame) -> pd.Series:
     if df.empty:
         return pd.Series(dtype=float)
 
-    close_col = "종가"
-    close = pd.to_numeric(df[close_col], errors="coerce").dropna()
+    close = pd.to_numeric(df["종가"], errors="coerce").dropna()
     close.index = pd.to_datetime(close.index)
     close = close.sort_index()
     return close
+
+
+def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
+    base_day = get_recent_krx_business_day_str()
+    tickers = stock.get_etf_ticker_list(base_day)
+
+    for ticker in tickers:
+        try:
+            name = stock.get_etf_ticker_name(ticker)
+            if name == etf_name:
+                return ticker
+        except Exception:
+            continue
+
+    raise ValueError(f"국내 ETF 이름 '{etf_name}'에 해당하는 종목코드를 찾지 못했습니다.")
 
 
 def download_close_series_overseas(symbol: str) -> pd.Series:
@@ -120,24 +151,23 @@ def download_close_series_overseas(symbol: str) -> pd.Series:
     return close
 
 
-def get_recent_krx_business_range(lookback_days: int = 240) -> tuple[str, str]:
-    now_kst = get_now_kst().date()
-    start = now_kst - timedelta(days=lookback_days)
-    return start.strftime("%Y%m%d"), now_kst.strftime("%Y%m%d")
+def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
+    if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
+        symbol_code = symbol_or_name
+    else:
+        symbol_code = resolve_domestic_etf_code_by_name(symbol_or_name)
 
-
-def download_close_series_domestic(symbol_code: str) -> pd.Series:
     from_date, to_date = get_recent_krx_business_range()
 
     df = stock.get_etf_ohlcv_by_date(from_date, to_date, symbol_code)
 
     if df.empty:
-        raise ValueError(f"{symbol_code} 국내 ETF 데이터를 가져오지 못했습니다.")
+        raise ValueError(f"{symbol_or_name} ({symbol_code}) 국내 ETF 데이터를 가져오지 못했습니다.")
 
     close = safe_series_close_from_pykrx(df)
 
     if len(close) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{symbol_code} 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
+        raise ValueError(f"{symbol_or_name} ({symbol_code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
 
     return close
 
@@ -168,6 +198,9 @@ def build_chart_data(close: pd.Series) -> dict:
     }
 
 
+# =========================
+# 지표 계산
+# =========================
 def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | None = None) -> dict:
     close = download_close_series(symbol, market_type)
 
@@ -287,7 +320,7 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
 
 
 # =========================
-# 자산별 판정 로직
+# 자산별 판정
 # =========================
 def evaluate_asset(
     symbol: str,
@@ -317,7 +350,7 @@ def evaluate_asset(
     recommendation = False
     signal = "CASH"
     signal_display_name = "CASH"
-    signal_strength = 0
+    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
 
     name_for_text = metrics["display_name"]
 
@@ -399,7 +432,7 @@ def evaluate_asset(
         - condition_values["price_distance_pct"] * 0.5
     )
 
-    result = {
+    return {
         "symbol": symbol,
         "display_name": metrics["display_name"],
         "leveraged_symbol": leveraged_symbol if leveraged_symbol else symbol,
@@ -427,8 +460,6 @@ def evaluate_asset(
         "chart_data": metrics["chart_data"],
         "signal_date": metrics["signal_date"]
     }
-
-    return result
 
 
 def select_alternative_asset(alt_assets: list[dict], market_type: str) -> tuple[dict | None, list]:
@@ -614,12 +645,23 @@ def run_strategy(
 
 
 # =========================
-# 메인 실행
+# 메인
 # =========================
 def main():
     now_kst = get_now_kst()
     today_date = now_kst.strftime("%Y-%m-%d")
     generated_at_kst = now_kst.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+    domestic_alt_assets = [
+        {
+            "base": asset["base_name"],
+            "base_name": asset["base_name"],
+            "leveraged": asset["leveraged_name"],
+            "leveraged_name": asset["leveraged_name"],
+            "priority": asset["priority"],
+        }
+        for asset in DOMESTIC_ALT_ASSETS
+    ]
 
     overseas_result = run_strategy(
         market_type="OVERSEAS",
@@ -634,11 +676,11 @@ def main():
     domestic_result = run_strategy(
         market_type="DOMESTIC",
         title="국내 ETF 추천 시그널",
-        primary_symbol=DOMESTIC_PRIMARY_SYMBOL,
+        primary_symbol=DOMESTIC_PRIMARY_NAME,
         primary_display_name=DOMESTIC_PRIMARY_NAME,
-        primary_leveraged_symbol=DOMESTIC_PRIMARY_SYMBOL,
+        primary_leveraged_symbol=DOMESTIC_PRIMARY_NAME,
         primary_leveraged_display_name=DOMESTIC_PRIMARY_NAME,
-        alt_assets=DOMESTIC_ALT_ASSETS,
+        alt_assets=domestic_alt_assets,
     )
 
     payload = {
