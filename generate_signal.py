@@ -55,14 +55,9 @@ DOMESTIC_ALT_ASSETS = [
         "priority": 1,
     },
     {
-        "base_name": "TIGER 미국S&P에너지",
-        "leveraged_name": "TIGER 미국S&P에너지",
-        "priority": 2,
-    },
-    {
         "base_name": "KODEX 골드선물(H)",
         "leveraged_name": "KODEX 골드선물(H)",
-        "priority": 3,
+        "priority": 2,
     },
 ]
 
