@@ -718,7 +718,7 @@ def main():
     )
 
     payload = {
-        "title": "국내 / 해외 ETF 추천 시그널",
+        "title": "국내 / 해외 ETF 보유전략",
         "today_date": today_date,
         "generated_at_kst": generated_at_kst,
         "page_notice": "국내/해외 모두 직전 거래일 마감 기준",
