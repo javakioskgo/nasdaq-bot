@@ -178,7 +178,17 @@ function translateMarketState(state) {
   if (state === "UNCLEAR") return "불명확";
   return state || "-";
 }
+function translateText(text) {
+  return text
+    .replaceAll("UNCLEAR", "불명확")
+    .replaceAll("SIDEWAYS", "횡보")
+    .replaceAll("UPTREND_RECOVERY", "상승 추세")
+    .replaceAll("EARLY_UPTREND", "초기 상승")
+    .replaceAll("DOWNTREND_CONFIRMED", "하락 추세")
+    .replaceAll("EMERGENCY_EXIT", "긴급 이탈");
+}
 
+  
 /* 카드 metric */
 function metric(label, value) {
   return `
@@ -201,7 +211,7 @@ function renderMarket(title, market, type) {
 
     <div class="reason">
       <strong>선정 이유</strong><br/>
-      ${market.reason}
+      ${translateText(market.reason)}
     </div>
 
     <div class="reason">
