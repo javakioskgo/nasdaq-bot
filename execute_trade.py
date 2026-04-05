@@ -6,6 +6,7 @@ from datetime import datetime
 from config import DRY_RUN
 from ibkr_client import IBKRClient
 from state_manager import is_already_executed_today, mark_execution
+from email_notifier import send_email, format_email_body
 
 def log(msg):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -28,6 +29,23 @@ def notify_error(error_text, target_name="UNKNOWN", current_symbol="UNKNOWN"):
         ]
     )
     send_telegram_message(message)
+
+def send_email_step(title, lines):
+    body = format_email_body(title, lines)
+    send_email(title, body)
+
+
+def send_email_error(error_text, target_name="UNKNOWN", current_symbol="UNKNOWN"):
+    title = "자동매매 오류"
+    body = format_email_body(
+        title,
+        [
+            f"추천 종목: {target_name}",
+            f"현재 보유: {current_symbol}",
+            f"오류 내용: {error_text}",
+            f"DRY_RUN: {DRY_RUN}"
+        ]
+    )
 
 
 def load_signal():
