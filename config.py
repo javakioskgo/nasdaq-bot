@@ -11,3 +11,12 @@ TELEGRAM_CHAT_ID = "8242861200"
 
 EMAIL_FROM = ""
 EMAIL_TO = ""
+
+EMAIL_ENABLED = True
+
+EMAIL_SMTP_SERVER = "smtp.gmail.com"
+EMAIL_SMTP_PORT = 587
+
+EMAIL_ADDRESS = "joonooyuni@gmail.com"
+EMAIL_APP_PASSWORD = "jhs0719^^^^^"
+EMAIL_TO = "joonooyuni@gmail.com"
