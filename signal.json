@@ -1,7 +1,7 @@
 {
   "title": "국내 / 해외 ETF 추천 시그널",
   "today_date": "2026-04-05",
-  "generated_at_kst": "2026-04-05 18:47:35 KST",
+  "generated_at_kst": "2026-04-05 19:04:48 KST",
   "page_notice": "국내/해외 모두 직전 거래일 마감 기준",
   "markets": {
     "overseas": {
@@ -456,7 +456,7 @@
       "signal_date": "2026-04-03",
       "signal": "CASH",
       "signal_display_name": "CASH",
-      "reason": "KODEX 미국나스닥100가 UNCLEAR 상태로 판단되어 KODEX 미국나스닥100는 보유하지 않습니다. 대체자산(TIGER 미국필라델피아반도체나스닥, KODEX 골드선물(H))도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다.",
+      "reason": "KODEX 미국나스닥100가 UNCLEAR 상태로 판단되어 KODEX 미국나스닥100는 보유하지 않습니다. 대체자산(TIGER 미국필라델피아반도체나스닥, KODEX 미국S&P500에너지(합성), KODEX 골드선물(H))도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다.",
       "final_trigger": "⚖️ KODEX 미국나스닥100 비추천 + 대체자산 전부 비추천 → CASH",
       "final_market_state": "CASH_SELECTED",
       "final_source": {
@@ -559,6 +559,42 @@
               "cond_above_n": false,
               "cond_below_n": false,
               "cond_below_lookback_required": true,
+              "cond_down_acceleration": true,
+              "is_sideways": false
+            }
+          },
+          {
+            "base_symbol": "KODEX 미국S&P500에너지(합성)",
+            "base_display_name": "KODEX 미국S&P500에너지(합성)",
+            "leveraged_symbol": "KODEX 미국S&P500에너지(합성)",
+            "leveraged_display_name": "KODEX 미국S&P500에너지(합성)",
+            "recommendation": "비추천",
+            "signal_strength": 0,
+            "signal_strength_label": "NOT_RECOMMENDED",
+            "reason": "KODEX 미국S&P500에너지(합성) 직전 거래일 종가가 전일 대비 3% 이상 하락해 긴급 피신 조건이 발동했습니다.",
+            "final_trigger": "🚨 긴급 피신: KODEX 미국S&P500에너지(합성) 직전 거래일 -3% 급락 → 비추천",
+            "score": -114200.332,
+            "display": {
+              "last_close": "20,775.00",
+              "daily_return": "-3.08%",
+              "ema5": "21,280.60",
+              "ema20": "20,659.11",
+              "ema5_slope": "-252.7977",
+              "ema20_slope": "+12.1988",
+              "ema5_slope_pct": "-1.1740%",
+              "ema20_slope_pct": "+0.0591%",
+              "price_distance_pct": "0.56%"
+            },
+            "conditions": {
+              "cond_ema_cross": true,
+              "cond_ema20_up": true,
+              "cond_ema5_up": false,
+              "cond_ema20_down": false,
+              "cond_ema5_down": true,
+              "cond_emergency_exit": true,
+              "cond_above_n": true,
+              "cond_below_n": false,
+              "cond_below_lookback_required": false,
               "cond_down_acceleration": true,
               "is_sideways": false
             }
