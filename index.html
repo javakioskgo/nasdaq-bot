@@ -100,44 +100,46 @@
   }
 
   fetch("./signal.json?v=" + Date.now())
-    .then(async (r) => {
-      const text = await r.text();
-      return JSON.parse(text);
-    })
-    .then((data) => {
-      const overseas = data?.markets?.overseas ?? null;
-      const domestic = data?.markets?.domestic ?? null;
+  .then(r => r.json())
+  .then(data => {
 
-      document.getElementById("page-title").textContent =
-        data.title || "국내 / 해외 ETF 추천 시그널";
+    const overseas = data?.markets?.overseas ?? null;
+    const domestic = data?.markets?.domestic ?? null;
 
-      document.getElementById("generated-at").textContent =
-        `생성 시각: ${data.generated_at_kst || "-"}`;
+    document.getElementById("page-title").textContent =
+      data.title || "국내 / 해외 ETF 추천 시그널";
 
-      document.getElementById("page-notice").textContent =
-        data.page_notice || "국내/해외 모두 직전 거래일 마감 기준";
+    document.getElementById("generated-at").textContent =
+      `생성 시각: ${data.generated_at_kst || "-"}`;
 
-      // 최상단 추천 카드
-      document.getElementById("domestic-top-pick").textContent =
-        domestic?.signal_display_name || domestic?.signal || "-";
-      document.getElementById("domestic-top-date").textContent =
-        `기준일: ${domestic?.signal_date || "-"} (직전 거래일 마감 기준)`;
+    document.getElementById("page-notice").textContent =
+      data.page_notice || "국내/해외 모두 직전 거래일 마감 기준";
 
-      document.getElementById("overseas-top-pick").textContent =
-        overseas?.signal_display_name || overseas?.signal || "-";
-      document.getElementById("overseas-top-date").textContent =
-        `기준일: ${overseas?.signal_date || "-"} (직전 거래일 마감 기준)`;
+    // 🔥 👉 여기부터 추가
+    document.getElementById("domestic-top-pick").textContent =
+      domestic?.signal_display_name || domestic?.signal || "-";
 
-      // 하단 이유 설명 카드
-      document.getElementById("domestic-reason-card").innerHTML =
-        renderReasonCard("국내 ETF 이유 설명", domestic);
+    document.getElementById("domestic-top-date").textContent =
+      `기준일: ${domestic?.signal_date || "-"} (직전 거래일 마감 기준)`;
 
-      document.getElementById("overseas-reason-card").innerHTML =
-        renderReasonCard("해외 ETF 이유 설명", overseas);
-    })
-    .catch((err) => {
-      document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
-    });
+    document.getElementById("overseas-top-pick").textContent =
+      overseas?.signal_display_name || overseas?.signal || "-";
+
+    document.getElementById("overseas-top-date").textContent =
+      `기준일: ${overseas?.signal_date || "-"} (직전 거래일 마감 기준)`;
+    // 🔥 👉 여기까지
+
+    // 아래는 기존 이유 카드 렌더링
+    document.getElementById("domestic-reason-card").innerHTML =
+      renderReasonCard("국내 ETF 이유 설명", domestic);
+
+    document.getElementById("overseas-reason-card").innerHTML =
+      renderReasonCard("해외 ETF 이유 설명", overseas);
+
+  })
+  .catch(err => {
+    document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
+  });
 </script>
 </body>
 </html>
