@@ -1,3 +1,5 @@
+from telegram_notifier import send_telegram_message, format_message
+
 import json
 from datetime import datetime
 
@@ -29,6 +31,11 @@ def get_current_position_symbol(positions):
 
 
 def main():
+    target_symbol = "UNKNOWN"
+    target_name = "UNKNOWN"
+    current_symbol = "UNKNOWN"
+    action_summary = "아직 판단 전"
+
     log("===== 자동매매 실행 시작 =====")
 
     signal_data = load_signal()
@@ -37,9 +44,10 @@ def main():
     log(f"추천 결과: {target_name} ({target_symbol})")
 
     client = IBKRClient()
-    client.connect()
 
     try:
+        client.connect()
+
         positions = client.get_positions()
         current_symbol = get_current_position_symbol(positions)
         available_funds = client.get_available_funds()
@@ -50,9 +58,11 @@ def main():
         if current_symbol == target_symbol:
             log("→ 현재 보유 종목과 추천 종목이 같음")
             log("→ 변경 없음 (HOLD)")
+            action_summary = "변경 없음 (HOLD)"
 
         elif current_symbol != "CASH" and target_symbol == "CASH":
             log(f"→ {current_symbol} 전량 매도 필요")
+            action_summary = f"{current_symbol} 전량 매도 필요"
 
             if DRY_RUN:
                 log("DRY_RUN 모드: 실제 매도 주문은 실행하지 않음")
@@ -62,6 +72,7 @@ def main():
 
         elif current_symbol == "CASH" and target_symbol != "CASH":
             log(f"→ {target_symbol} 신규 매수 필요")
+            action_summary = f"{target_symbol} 신규 매수 필요"
 
             if DRY_RUN:
                 log("DRY_RUN 모드: 실제 매수 주문은 실행하지 않음")
@@ -72,6 +83,7 @@ def main():
         else:
             log(f"→ {current_symbol} 보유 중, 목표 종목은 {target_symbol}")
             log("→ 기존 종목 매도 후 새 종목 매수 필요")
+            action_summary = f"{current_symbol} 매도 후 {target_symbol} 매수 필요"
 
             if DRY_RUN:
                 log("DRY_RUN 모드: 실제 매도/매수 주문은 실행하지 않음")
@@ -83,7 +95,19 @@ def main():
     finally:
         client.disconnect()
 
-    log("===== 자동매매 종료 =====")
+        log("===== 자동매매 종료 =====")
+
+        message = format_message(
+            "자동매매 실행 결과",
+            [
+                f"추천 종목: {target_name}",
+                f"현재 보유: {current_symbol}",
+                f"판단 결과: {action_summary}",
+                f"DRY_RUN: {DRY_RUN}"
+            ]
+        )
+
+        send_telegram_message(message)
 
 
 if __name__ == "__main__":
