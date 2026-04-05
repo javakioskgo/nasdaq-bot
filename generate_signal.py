@@ -166,22 +166,30 @@ def safe_series_close_from_fdr(df: pd.DataFrame) -> pd.Series:
     return close
 
 
-def download_close_series_overseas(symbol: str) -> pd.Series:
-    df = yf.download(
-        symbol,
-        period=DOWNLOAD_PERIOD,
-        interval=DOWNLOAD_INTERVAL,
-        auto_adjust=True,
-        progress=False
-    )
+def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
+    if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
+        code = symbol_or_name
+        display_name = symbol_or_name
+    else:
+        code = resolve_domestic_etf_code_by_name(symbol_or_name)
+        display_name = symbol_or_name
 
-    if df.empty or len(df) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{symbol} 데이터를 충분히 가져오지 못했습니다.")
+    print(f"[DOMESTIC] requested={symbol_or_name}, resolved_code={code}")
 
-    close = safe_series_close_from_yf(df)
+    df = fdr.DataReader(code)
+
+    if df.empty:
+        raise ValueError(f"{display_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
+
+    print(df.tail(3))
+
+    close = safe_series_close_from_fdr(df)
+    close = close.tail(180)
+
+    print(f"[DOMESTIC] last_close={close.iloc[-1]}, last_date={close.index[-1]}")
 
     if len(close) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{symbol} 유효한 종가 데이터가 충분하지 않습니다.")
+        raise ValueError(f"{display_name} ({code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
 
     return close
 
