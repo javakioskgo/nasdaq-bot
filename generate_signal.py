@@ -50,8 +50,8 @@ DOMESTIC_PRIMARY_NAME = "KODEX 미국나스닥100"
 
 DOMESTIC_ALT_ASSETS = [
     {
-        "base_name": "TIGER 미국필라델피아반도체",
-        "leveraged_name": "TIGER 미국필라델피아반도체",
+        "base_name": "TIGER 미국필라델피아반도체나스닥",
+        "leveraged_name": "TIGER 미국필라델피아반도체나스닥",
         "priority": 1,
     },
     {
@@ -112,22 +112,35 @@ def resolve_domestic_etf_code_by_name(etf_name: str) -> str:
 
     name_map = build_domestic_etf_name_map()
 
-    if etf_name not in name_map:
-        normalized_target = etf_name.replace(" ", "")
-        candidates = [
-            name for name in name_map.keys()
-            if normalized_target in name.replace(" ", "")
-            or name.replace(" ", "") in normalized_target
-        ]
-        sample = ", ".join(sorted(candidates[:10]))
-        raise ValueError(
-            f"국내 ETF 이름 '{etf_name}'을 ETF/KR 목록에서 찾지 못했습니다. "
-            f"유사 후보: {sample if sample else '없음'}"
-        )
+    # 1. 완전 일치
+    if etf_name in name_map:
+        code = name_map[etf_name]
+        _domestic_code_cache[etf_name] = code
+        return code
 
-    code = name_map[etf_name]
-    _domestic_code_cache[etf_name] = code
-    return code
+    # 2. 공백 제거 후 완전 일치
+    normalized_target = etf_name.replace(" ", "")
+    for name, code in name_map.items():
+        if name.replace(" ", "") == normalized_target:
+            _domestic_code_cache[etf_name] = code
+            return code
+
+    # 3. 부분 일치 후보 중 첫 번째 사용
+    candidates = [
+        (name, code) for name, code in name_map.items()
+        if normalized_target in name.replace(" ", "")
+    ]
+    if len(candidates) == 1:
+        matched_name, matched_code = candidates[0]
+        print(f"[INFO] 국내 ETF 이름 자동 보정: '{etf_name}' -> '{matched_name}'")
+        _domestic_code_cache[etf_name] = matched_code
+        return matched_code
+
+    sample = ", ".join([name for name, _ in candidates[:10]])
+    raise ValueError(
+        f"국내 ETF 이름 '{etf_name}'을 ETF/KR 목록에서 찾지 못했습니다. "
+        f"유사 후보: {sample if sample else '없음'}"
+    )
 
 # =========================
 # 공통 유틸
