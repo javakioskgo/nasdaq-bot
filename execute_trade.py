@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from config import DRY_RUN
+from ibkr_client import IBKRClient
 
 
 def log(msg):
@@ -14,39 +15,73 @@ def load_signal():
         return json.load(f)
 
 
+def extract_target_signal(signal_data):
+    overseas = signal_data["markets"]["overseas"]
+    return overseas["signal"], overseas["signal_display_name"]
+
+
+def get_current_position_symbol(positions):
+    if not positions:
+        return "CASH"
+
+    first_position = positions[0]
+    return first_position.get("symbol", "CASH")
+
+
 def main():
     log("===== 자동매매 실행 시작 =====")
 
     signal_data = load_signal()
+    target_symbol, target_name = extract_target_signal(signal_data)
 
-    # 네 구조에 맞게 수정 가능
-    overseas = signal_data["markets"]["overseas"]
+    log(f"추천 결과: {target_name} ({target_symbol})")
 
-    target = overseas["signal"]
-    target_name = overseas["signal_display_name"]
+    client = IBKRClient()
+    client.connect()
 
-    log(f"추천 결과: {target_name} ({target})")
+    try:
+        positions = client.get_positions()
+        current_symbol = get_current_position_symbol(positions)
+        available_funds = client.get_available_funds()
 
-    # 현재는 테스트 모드
-    if DRY_RUN:
-        log("DRY_RUN 모드: 실제 주문은 실행하지 않음")
+        log(f"현재 보유: {current_symbol}")
+        log(f"매수 가능 금액: ${available_funds}")
 
-        # 가짜 현재 상태
-        current_position = "CASH"
-
-        log(f"현재 보유: {current_position}")
-
-        if current_position == target:
+        if current_symbol == target_symbol:
+            log("→ 현재 보유 종목과 추천 종목이 같음")
             log("→ 변경 없음 (HOLD)")
 
-        elif current_position != "CASH" and target == "CASH":
-            log("→ 전량 매도 예정")
+        elif current_symbol != "CASH" and target_symbol == "CASH":
+            log(f"→ {current_symbol} 전량 매도 필요")
 
-        elif current_position == "CASH" and target != "CASH":
-            log(f"→ {target} 매수 예정 (최대 금액)")
+            if DRY_RUN:
+                log("DRY_RUN 모드: 실제 매도 주문은 실행하지 않음")
+            else:
+                sell_result = client.sell_all(current_symbol)
+                log(f"매도 주문 접수: {sell_result}")
+
+        elif current_symbol == "CASH" and target_symbol != "CASH":
+            log(f"→ {target_symbol} 신규 매수 필요")
+
+            if DRY_RUN:
+                log("DRY_RUN 모드: 실제 매수 주문은 실행하지 않음")
+            else:
+                buy_result = client.buy_max(target_symbol, available_funds)
+                log(f"매수 주문 접수: {buy_result}")
 
         else:
-            log(f"→ {current_position} 매도 후 {target} 매수 예정")
+            log(f"→ {current_symbol} 보유 중, 목표 종목은 {target_symbol}")
+            log("→ 기존 종목 매도 후 새 종목 매수 필요")
+
+            if DRY_RUN:
+                log("DRY_RUN 모드: 실제 매도/매수 주문은 실행하지 않음")
+            else:
+                sell_result = client.sell_all(current_symbol)
+                log(f"매도 주문 접수: {sell_result}")
+                log("현금 반영 확인 후 매수 진행 예정")
+
+    finally:
+        client.disconnect()
 
     log("===== 자동매매 종료 =====")
 
