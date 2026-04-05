@@ -39,60 +39,90 @@
     return `
       <div class="metric">
         <div class="label">${label}</div>
-        <div class="value">${value}</div>
+        <div class="value">${value ?? "-"}</div>
       </div>
     `;
   }
 
   function renderMarket(title, market) {
-    const p = market.primary_review;
+    if (!market) {
+      return `
+        <div class="section-title">${title}</div>
+        <div class="reason">데이터가 없습니다.</div>
+      `;
+    }
+
+    const p = market.primary_review || {};
+    const display = p.display || {};
+
     return `
       <div class="section-title">${title}</div>
-      <div class="sub">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
-      <div class="badge">오늘 대응: ${market.signal_display_name}</div>
+      <div class="sub">기준일: ${market.signal_date || "-"} (직전 거래일 마감 기준)</div>
+      <div class="badge">오늘 대응: ${market.signal_display_name || market.signal || "-"}</div>
 
       <div class="reason">
         <strong>선정 이유</strong><br />
-        ${market.reason}
+        ${market.reason || "-"}
       </div>
 
       <div class="reason">
         <strong>1차 판단 자산</strong><br />
-        ${p.display_name} / ${p.recommendation} / ${p.market_state}
+        ${(p.display_name || "-")} / ${(p.recommendation || "-")} / ${(p.market_state || "-")}
       </div>
 
       <div class="metric-grid">
-        ${metric("직전 거래일 종가", p.display.last_close)}
-        ${metric("직전일 대비", p.display.daily_return)}
-        ${metric("EMA5", p.display.ema5)}
-        ${metric("EMA20", p.display.ema20)}
-        ${metric("EMA5 기울기", p.display.ema5_slope)}
-        ${metric("EMA20 기울기", p.display.ema20_slope)}
+        ${metric("직전 거래일 종가", display.last_close)}
+        ${metric("직전일 대비", display.daily_return)}
+        ${metric("EMA5", display.ema5)}
+        ${metric("EMA20", display.ema20)}
+        ${metric("EMA5 기울기", display.ema5_slope)}
+        ${metric("EMA20 기울기", display.ema20_slope)}
       </div>
     `;
   }
 
-  fetch("./signal.json")
-    .then(r => r.json())
-    .then(data => {
-      console.log("signal.json:", data);
+  fetch("./signal.json?v=" + Date.now())
+    .then(async (r) => {
+      const text = await r.text();
+      console.log("raw signal.json text:", text);
 
-      if (!data.markets || !data.markets.overseas || !data.markets.domestic) {
-        throw new Error("signal.json 구조가 예상과 다릅니다.");
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("signal.json이 JSON 형식이 아닙니다.");
+      }
+    })
+    .then((data) => {
+      console.log("parsed signal.json:", data);
+      console.log("top-level keys:", Object.keys(data || {}));
+
+      // 새 구조
+      const overseas = data?.markets?.overseas ?? data?.overseas ?? null;
+      const domestic = data?.markets?.domestic ?? data?.domestic ?? null;
+
+      if (!overseas && !domestic) {
+        throw new Error(
+          "signal.json 구조가 예상과 다릅니다. top-level keys = " +
+          JSON.stringify(Object.keys(data || {}))
+        );
       }
 
-      document.getElementById("page-title").textContent = data.title;
+      document.getElementById("page-title").textContent =
+        data.title || "국내 / 해외 ETF 추천 시그널";
+
       document.getElementById("generated-at").textContent =
-        `생성 시각: ${data.generated_at_kst}`;
-      document.getElementById("page-notice").textContent = data.page_notice;
+        `생성 시각: ${data.generated_at_kst || "-"}`;
+
+      document.getElementById("page-notice").textContent =
+        data.page_notice || "국내/해외 모두 직전 거래일 마감 기준";
 
       document.getElementById("overseas-card").innerHTML =
-        renderMarket("해외 ETF", data.markets.overseas);
+        renderMarket("해외 ETF", overseas);
 
       document.getElementById("domestic-card").innerHTML =
-        renderMarket("국내 ETF", data.markets.domestic);
+        renderMarket("국내 ETF", domestic);
     })
-    .catch(err => {
+    .catch((err) => {
       document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
     });
 </script>
