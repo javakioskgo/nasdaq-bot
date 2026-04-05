@@ -1,23 +1,15 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 import yfinance as yf
+from pykrx import stock
 
 
 # =========================
-# 전략 파라미터
+# 공통 전략 파라미터
 # =========================
-PRIMARY_SYMBOL = "QQQ"
-PRIMARY_LEVERAGED_SYMBOL = "TQQQ"
-
-ALT_ASSETS = [
-    {"base": "SOXX", "leveraged": "SOXL", "priority": 1},  # 반도체
-    {"base": "XLE", "leveraged": "ERX", "priority": 2},    # 에너지
-    {"base": "GLD", "leveraged": "UGL", "priority": 3},    # 금
-]
-
 DOWNLOAD_PERIOD = "6mo"
 DOWNLOAD_INTERVAL = "1d"
 MIN_REQUIRED_BARS = 25
@@ -26,21 +18,70 @@ CHART_BARS = 60
 EMA_FAST_SPAN = 5
 EMA_SLOW_SPAN = 20
 
-EMERGENCY_DROP_PCT = -0.03              # 하루 -3% 이상 하락 시 긴급 피신
-SIDEWAYS_SLOPE_PCT_THRESHOLD = 0.0005   # EMA20 하루 변화율이 0.05% 미만이면 약한 추세
-SIDEWAYS_DISTANCE_THRESHOLD = 0.02      # 종가가 EMA20과 2% 이내면 횡보 후보
+EMERGENCY_DROP_PCT = -0.03
+SIDEWAYS_SLOPE_PCT_THRESHOLD = 0.0005
+SIDEWAYS_DISTANCE_THRESHOLD = 0.02
 
-DOWN_ACCEL_RATIO = 1.5                  # EMA5 하락 속도가 EMA20보다 1.5배 이상 빠를 때
-ABOVE_CONFIRM_BARS = 2                  # EMA20 위 연속 확인 봉 수
-BELOW_CONFIRM_BARS = 2                  # EMA20 아래 연속 확인 봉 수
-BELOW_LOOKBACK_BARS = 5                 # 최근 확인 봉 수
-BELOW_REQUIRED_COUNT = 3                # 최근 N봉 중 M봉 이상 EMA20 아래
+DOWN_ACCEL_RATIO = 1.5
+ABOVE_CONFIRM_BARS = 2
+BELOW_CONFIRM_BARS = 2
+BELOW_LOOKBACK_BARS = 5
+BELOW_REQUIRED_COUNT = 3
+
+
+# =========================
+# 해외 전략 파라미터
+# =========================
+OVERSEAS_PRIMARY_SYMBOL = "QQQ"
+OVERSEAS_PRIMARY_LEVERAGED_SYMBOL = "TQQQ"
+
+OVERSEAS_ALT_ASSETS = [
+    {"base": "SOXX", "leveraged": "SOXL", "priority": 1},
+    {"base": "XLE", "leveraged": "ERX", "priority": 2},
+    {"base": "GLD", "leveraged": "UGL", "priority": 3},
+]
+
+
+# =========================
+# 국내 전략 파라미터
+# 주의: 아래 ETF 코드는 실제 사용 중인 종목코드로 확인 후 유지하세요.
+# =========================
+DOMESTIC_PRIMARY_SYMBOL = "379800"  # KODEX 미국나스닥100
+DOMESTIC_PRIMARY_NAME = "KODEX 미국나스닥100"
+
+DOMESTIC_ALT_ASSETS = [
+    {
+        "base": "381180",  # TIGER 미국필라델피아반도체
+        "base_name": "TIGER 미국필라델피아반도체",
+        "leveraged": "381180",
+        "leveraged_name": "TIGER 미국필라델피아반도체",
+        "priority": 1,
+    },
+    {
+        "base": "381170",  # TIGER 미국S&P에너지
+        "base_name": "TIGER 미국S&P에너지",
+        "leveraged": "381170",
+        "leveraged_name": "TIGER 미국S&P에너지",
+        "priority": 2,
+    },
+    {
+        "base": "132030",  # KODEX 골드선물(H)
+        "base_name": "KODEX 골드선물(H)",
+        "leveraged": "132030",
+        "leveraged_name": "KODEX 골드선물(H)",
+        "priority": 3,
+    },
+]
 
 
 # =========================
 # 공통 유틸
 # =========================
-def safe_series_close(df: pd.DataFrame) -> pd.Series:
+def get_now_kst() -> datetime:
+    return datetime.now(ZoneInfo("Asia/Seoul"))
+
+
+def safe_series_close_from_yf(df: pd.DataFrame) -> pd.Series:
     close = df["Close"].copy()
     if isinstance(close, pd.DataFrame):
         close = close.iloc[:, 0]
@@ -48,7 +89,18 @@ def safe_series_close(df: pd.DataFrame) -> pd.Series:
     return close
 
 
-def download_close_series(symbol: str) -> pd.Series:
+def safe_series_close_from_pykrx(df: pd.DataFrame) -> pd.Series:
+    if df.empty:
+        return pd.Series(dtype=float)
+
+    close_col = "종가"
+    close = pd.to_numeric(df[close_col], errors="coerce").dropna()
+    close.index = pd.to_datetime(close.index)
+    close = close.sort_index()
+    return close
+
+
+def download_close_series_overseas(symbol: str) -> pd.Series:
     df = yf.download(
         symbol,
         period=DOWNLOAD_PERIOD,
@@ -60,12 +112,42 @@ def download_close_series(symbol: str) -> pd.Series:
     if df.empty or len(df) < MIN_REQUIRED_BARS:
         raise ValueError(f"{symbol} 데이터를 충분히 가져오지 못했습니다.")
 
-    close = safe_series_close(df)
+    close = safe_series_close_from_yf(df)
 
     if len(close) < MIN_REQUIRED_BARS:
         raise ValueError(f"{symbol} 유효한 종가 데이터가 충분하지 않습니다.")
 
     return close
+
+
+def get_recent_krx_business_range(lookback_days: int = 240) -> tuple[str, str]:
+    now_kst = get_now_kst().date()
+    start = now_kst - timedelta(days=lookback_days)
+    return start.strftime("%Y%m%d"), now_kst.strftime("%Y%m%d")
+
+
+def download_close_series_domestic(symbol_code: str) -> pd.Series:
+    from_date, to_date = get_recent_krx_business_range()
+
+    df = stock.get_etf_ohlcv_by_date(from_date, to_date, symbol_code)
+
+    if df.empty:
+        raise ValueError(f"{symbol_code} 국내 ETF 데이터를 가져오지 못했습니다.")
+
+    close = safe_series_close_from_pykrx(df)
+
+    if len(close) < MIN_REQUIRED_BARS:
+        raise ValueError(f"{symbol_code} 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
+
+    return close
+
+
+def download_close_series(symbol: str, market_type: str) -> pd.Series:
+    if market_type == "OVERSEAS":
+        return download_close_series_overseas(symbol)
+    if market_type == "DOMESTIC":
+        return download_close_series_domestic(symbol)
+    raise ValueError(f"지원하지 않는 market_type: {market_type}")
 
 
 def build_chart_data(close: pd.Series) -> dict:
@@ -86,8 +168,8 @@ def build_chart_data(close: pd.Series) -> dict:
     }
 
 
-def calculate_asset_metrics(symbol: str) -> dict:
-    close = download_close_series(symbol)
+def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | None = None) -> dict:
+    close = download_close_series(symbol, market_type)
 
     ema5 = close.ewm(span=EMA_FAST_SPAN, adjust=False).mean()
     ema20 = close.ewm(span=EMA_SLOW_SPAN, adjust=False).mean()
@@ -153,6 +235,7 @@ def calculate_asset_metrics(symbol: str) -> dict:
 
     return {
         "symbol": symbol,
+        "display_name": display_name if display_name else symbol,
         "signal_date": signal_date,
         "close": close,
         "chart_data": build_chart_data(close),
@@ -206,8 +289,15 @@ def calculate_asset_metrics(symbol: str) -> dict:
 # =========================
 # 자산별 판정 로직
 # =========================
-def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary: bool = False) -> dict:
-    metrics = calculate_asset_metrics(symbol)
+def evaluate_asset(
+    symbol: str,
+    market_type: str,
+    leveraged_symbol: str | None = None,
+    is_primary: bool = False,
+    display_name: str | None = None,
+    leveraged_display_name: str | None = None,
+) -> dict:
+    metrics = calculate_asset_metrics(symbol, market_type, display_name=display_name)
     conditions = metrics["conditions"]
 
     cond_ema_cross = conditions["cond_ema_cross"]
@@ -226,12 +316,15 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
     decision_path = []
     recommendation = False
     signal = "CASH"
-    signal_strength = 0  # 0: 비추천, 1: 초기 상승, 2: 강한 상승
+    signal_display_name = "CASH"
+    signal_strength = 0
+
+    name_for_text = metrics["display_name"]
 
     if cond_emergency_exit:
         market_state = "EMERGENCY_EXIT"
-        reason = f"{symbol} 전일 종가가 전일 대비 3% 이상 하락해 긴급 피신 조건이 발동했습니다."
-        final_trigger = f"🚨 긴급 피신: {symbol} 전일 -3% 급락 → 비추천"
+        reason = f"{name_for_text} 직전 거래일 종가가 전일 대비 3% 이상 하락해 긴급 피신 조건이 발동했습니다."
+        final_trigger = f"🚨 긴급 피신: {name_for_text} 직전 거래일 -3% 급락 → 비추천"
         decision_path.append("cond_emergency_exit=True")
 
     elif (
@@ -276,6 +369,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
+        signal_display_name = leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else name_for_text)
         signal_strength = 2
 
     elif cond_ema_cross and cond_ema20_up:
@@ -288,6 +382,7 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         ])
         recommendation = True
         signal = leveraged_symbol if leveraged_symbol else symbol
+        signal_display_name = leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else name_for_text)
         signal_strength = 1
 
     else:
@@ -296,7 +391,6 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
         final_trigger = "⚖️ 방향 불명확 → 비추천"
         decision_path.append("fallback_not_recommended=True")
 
-    # 추천 자산 정렬용 점수
     latest_indicator_info = metrics["latest_indicator_info"]
     condition_values = metrics["condition_values"]
     score = (
@@ -307,10 +401,13 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
 
     result = {
         "symbol": symbol,
+        "display_name": metrics["display_name"],
         "leveraged_symbol": leveraged_symbol if leveraged_symbol else symbol,
+        "leveraged_display_name": leveraged_display_name if leveraged_display_name else (leveraged_symbol if leveraged_symbol else metrics["display_name"]),
         "is_primary": is_primary,
         "recommendation": recommendation,
         "signal": signal if recommendation else "CASH",
+        "signal_display_name": signal_display_name if recommendation else "CASH",
         "signal_strength": signal_strength,
         "signal_strength_label": (
             "STRONG_UPTREND" if signal_strength == 2
@@ -334,14 +431,17 @@ def evaluate_asset(symbol: str, leveraged_symbol: str | None = None, is_primary:
     return result
 
 
-def select_alternative_asset() -> tuple[dict | None, list]:
+def select_alternative_asset(alt_assets: list[dict], market_type: str) -> tuple[dict | None, list]:
     alt_results = []
 
-    for asset in ALT_ASSETS:
+    for asset in alt_assets:
         result = evaluate_asset(
             symbol=asset["base"],
             leveraged_symbol=asset["leveraged"],
-            is_primary=False
+            market_type=market_type,
+            is_primary=False,
+            display_name=asset.get("base_name", asset["base"]),
+            leveraged_display_name=asset.get("leveraged_name", asset["leveraged"]),
         )
         result["priority"] = asset["priority"]
         alt_results.append(result)
@@ -351,95 +451,106 @@ def select_alternative_asset() -> tuple[dict | None, list]:
     if not recommended:
         return None, alt_results
 
-    # 우선순위:
-    # 1) 강한 상승(signal_strength=2) 우선
-    # 2) 같은 등급이면 score 높은 자산 우선
-    # 3) 그래도 같으면 priority 작은 자산 우선
     recommended.sort(
         key=lambda x: (-x["signal_strength"], -x["score"], x["priority"])
     )
     return recommended[0], alt_results
 
-# =========================
-# 메인 실행
-# =========================
-def main():
-    today_date = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d")
-    generated_at_kst = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M:%S %Z")
 
-    # 1차: QQQ 우선 판단
+def run_strategy(
+    market_type: str,
+    title: str,
+    primary_symbol: str,
+    primary_display_name: str,
+    primary_leveraged_symbol: str,
+    primary_leveraged_display_name: str,
+    alt_assets: list[dict],
+) -> dict:
     primary_result = evaluate_asset(
-        symbol=PRIMARY_SYMBOL,
-        leveraged_symbol=PRIMARY_LEVERAGED_SYMBOL,
-        is_primary=True
+        symbol=primary_symbol,
+        leveraged_symbol=primary_leveraged_symbol,
+        market_type=market_type,
+        is_primary=True,
+        display_name=primary_display_name,
+        leveraged_display_name=primary_leveraged_display_name,
     )
 
     signal_date = primary_result["signal_date"]
 
     if primary_result["recommendation"]:
-        final_signal = PRIMARY_LEVERAGED_SYMBOL
-        final_title = "TQQQ 우선 / 대체자산 추천 시그널"
+        final_signal = primary_result["leveraged_symbol"]
+        final_signal_display_name = primary_result["leveraged_display_name"]
         final_market_state = "PRIMARY_SELECTED"
         reason = (
-            "QQQ가 상승 추세로 판단되어 대체자산 검토 없이 "
-            f"{PRIMARY_LEVERAGED_SYMBOL}(레버리지)를 보유합니다."
+            f"{primary_display_name}가 상승 추세로 판단되어 "
+            f"{primary_leveraged_display_name}를 보유합니다."
         )
-        final_trigger = f"🥇 QQQ 우선 조건 충족 → {PRIMARY_LEVERAGED_SYMBOL}"
+        final_trigger = f"🥇 {primary_display_name} 우선 조건 충족 → {primary_leveraged_display_name}"
 
         alt_selected = None
         alt_results = []
 
         final_source = {
             "type": "PRIMARY",
-            "base_symbol": PRIMARY_SYMBOL,
-            "leveraged_symbol": PRIMARY_LEVERAGED_SYMBOL
+            "base_symbol": primary_symbol,
+            "base_display_name": primary_display_name,
+            "leveraged_symbol": primary_leveraged_symbol,
+            "leveraged_display_name": primary_leveraged_display_name,
         }
 
     else:
-        # 2차: 대체자산 검토
-        alt_selected, alt_results = select_alternative_asset()
+        alt_selected, alt_results = select_alternative_asset(alt_assets, market_type)
 
         if alt_selected:
             final_signal = alt_selected["leveraged_symbol"]
-            final_title = "TQQQ 우선 / 대체자산 추천 시그널"
+            final_signal_display_name = alt_selected["leveraged_display_name"]
             final_market_state = "ALT_SELECTED"
             reason = (
-                f"QQQ가 {primary_result['market_state']} 상태로 판단되어 "
-                f"{PRIMARY_LEVERAGED_SYMBOL}는 보유하지 않습니다. "
-                f"대체자산을 검토한 결과 {alt_selected['symbol']}가 가장 우호적인 추세를 보여 "
-                f"{alt_selected['leveraged_symbol']}(레버리지)를 선택했습니다."
+                f"{primary_display_name}가 {primary_result['market_state']} 상태로 판단되어 "
+                f"{primary_leveraged_display_name}는 보유하지 않습니다. "
+                f"대체자산을 검토한 결과 {alt_selected['display_name']}가 가장 우호적인 추세를 보여 "
+                f"{alt_selected['leveraged_display_name']}를 선택했습니다."
             )
             final_trigger = (
-                f"🔁 QQQ 비추천 → 대체자산 {alt_selected['symbol']} 추천 → "
-                f"{alt_selected['leveraged_symbol']}"
+                f"🔁 {primary_display_name} 비추천 → 대체자산 {alt_selected['display_name']} 추천 → "
+                f"{alt_selected['leveraged_display_name']}"
             )
             final_source = {
                 "type": "ALTERNATIVE",
                 "base_symbol": alt_selected["symbol"],
-                "leveraged_symbol": alt_selected["leveraged_symbol"]
+                "base_display_name": alt_selected["display_name"],
+                "leveraged_symbol": alt_selected["leveraged_symbol"],
+                "leveraged_display_name": alt_selected["leveraged_display_name"],
             }
         else:
             final_signal = "CASH"
-            final_title = "TQQQ 우선 / 대체자산 추천 시그널"
+            final_signal_display_name = "CASH"
             final_market_state = "CASH_SELECTED"
+            alt_names = ", ".join([asset.get("base_name", asset["base"]) for asset in alt_assets])
             reason = (
-                f"QQQ가 {primary_result['market_state']} 상태로 판단되어 "
-                f"{PRIMARY_LEVERAGED_SYMBOL}는 보유하지 않습니다. "
-                "대체자산(SOXX, XLE, IBB, GLD)도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다."
+                f"{primary_display_name}가 {primary_result['market_state']} 상태로 판단되어 "
+                f"{primary_leveraged_display_name}는 보유하지 않습니다. "
+                f"대체자산({alt_names})도 모두 보유 조건을 충족하지 않아 CASH를 유지합니다."
             )
-            final_trigger = "⚖️ QQQ 비추천 + 대체자산 전부 비추천 → CASH"
+            final_trigger = f"⚖️ {primary_display_name} 비추천 + 대체자산 전부 비추천 → CASH"
             final_source = {
                 "type": "CASH",
                 "base_symbol": None,
-                "leveraged_symbol": None
+                "base_display_name": None,
+                "leveraged_symbol": None,
+                "leveraged_display_name": None,
             }
 
     alt_review_summary = []
     for alt in alt_results:
         alt_review_summary.append({
             "base_symbol": alt["symbol"],
+            "base_display_name": alt["display_name"],
             "leveraged_symbol": alt["leveraged_symbol"],
+            "leveraged_display_name": alt["leveraged_display_name"],
             "recommendation": "추천" if alt["recommendation"] else "비추천",
+            "signal_strength": alt["signal_strength"],
+            "signal_strength_label": alt["signal_strength_label"],
             "reason": alt["reason"],
             "final_trigger": alt["final_trigger"],
             "score": alt["score"],
@@ -448,59 +559,25 @@ def main():
         })
 
     selected_alt_brief_reason = (
-        f"{alt_selected['symbol']}가 추천되어 {alt_selected['leveraged_symbol']} 선택"
+        f"{alt_selected['display_name']}가 추천되어 {alt_selected['leveraged_display_name']} 선택"
         if alt_selected else
         "대체자산 모두 비추천"
     )
 
-    payload = {
-        # =========================
-        # 기존 HTML 호환용 키
-        # =========================
-        "title": final_title,
-        "today_date": today_date,
+    return {
+        "title": title,
         "signal_date": signal_date,
         "signal": final_signal,
+        "signal_display_name": final_signal_display_name,
         "reason": reason,
         "final_trigger": final_trigger,
-
-        # 기존 QQQ 카드에 그대로 쓰기 좋은 값
-        "last_close": primary_result["display"]["last_close"],
-        "daily_return": primary_result["display"]["daily_return"],
-        "ema5": primary_result["display"]["ema5"],
-        "ema20": primary_result["display"]["ema20"],
-        "ema5_slope": primary_result["display"]["ema5_slope"],
-        "ema20_slope": primary_result["display"]["ema20_slope"],
-
-        "cond_ema_cross": primary_result["conditions"]["cond_ema_cross"],
-        "cond_ema20_up": primary_result["conditions"]["cond_ema20_up"],
-        "cond_ema5_up": primary_result["conditions"]["cond_ema5_up"],
-        "cond_emergency_exit": primary_result["conditions"]["cond_emergency_exit"],
-        "is_sideways": primary_result["conditions"]["is_sideways"],
-
-        "labels": primary_result["chart_data"]["labels"],
-        "close_data": primary_result["chart_data"]["close_data"],
-        "ema5_data": primary_result["chart_data"]["ema5_data"],
-        "ema20_data": primary_result["chart_data"]["ema20_data"],
-
-        # =========================
-        # 새 UI용 상단 요약
-        # =========================
-        "summary": {
-            "title": final_title,
-            "today_action": final_signal,
-            "final_market_state": final_market_state,
-            "final_source": final_source,
-            "primary_symbol": PRIMARY_SYMBOL,
-            "primary_leveraged_symbol": PRIMARY_LEVERAGED_SYMBOL
-        },
-
-        # =========================
-        # QQQ 판단 카드용
-        # =========================
+        "final_market_state": final_market_state,
+        "final_source": final_source,
         "primary_review": {
             "symbol": primary_result["symbol"],
+            "display_name": primary_result["display_name"],
             "leveraged_symbol": primary_result["leveraged_symbol"],
+            "leveraged_display_name": primary_result["leveraged_display_name"],
             "recommendation": "추천" if primary_result["recommendation"] else "비추천",
             "market_state": primary_result["market_state"],
             "reason": primary_result["reason"],
@@ -512,33 +589,66 @@ def main():
             "latest_price_info": primary_result["latest_price_info"],
             "latest_indicator_info": primary_result["latest_indicator_info"]
         },
-
-        # =========================
-        # 대체자산 카드용
-        # =========================
         "alt_review": {
             "selected_alt_brief_reason": selected_alt_brief_reason,
             "selected_asset": {
                 "base_symbol": alt_selected["symbol"],
+                "base_display_name": alt_selected["display_name"],
                 "leveraged_symbol": alt_selected["leveraged_symbol"],
+                "leveraged_display_name": alt_selected["leveraged_display_name"],
+                "signal_strength": alt_selected["signal_strength"],
+                "signal_strength_label": alt_selected["signal_strength_label"],
                 "reason": alt_selected["reason"],
                 "final_trigger": alt_selected["final_trigger"],
                 "score": alt_selected["score"]
             } if alt_selected else None,
             "candidates": alt_review_summary
         },
+        "chart_data": {
+            "labels": primary_result["chart_data"]["labels"],
+            "close_data": primary_result["chart_data"]["close_data"],
+            "ema5_data": primary_result["chart_data"]["ema5_data"],
+            "ema20_data": primary_result["chart_data"]["ema20_data"]
+        }
+    }
 
-        # =========================
-        # 메타 / 디버깅
-        # =========================
-        "meta": {
-            "generated_at_kst": generated_at_kst,
-            "today_date": today_date,
-            "signal_date": signal_date,
-            "primary_symbol": PRIMARY_SYMBOL,
-            "download_period": DOWNLOAD_PERIOD,
-            "download_interval": DOWNLOAD_INTERVAL,
-            "alternative_assets": ALT_ASSETS
+
+# =========================
+# 메인 실행
+# =========================
+def main():
+    now_kst = get_now_kst()
+    today_date = now_kst.strftime("%Y-%m-%d")
+    generated_at_kst = now_kst.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+    overseas_result = run_strategy(
+        market_type="OVERSEAS",
+        title="해외 ETF 추천 시그널",
+        primary_symbol=OVERSEAS_PRIMARY_SYMBOL,
+        primary_display_name="QQQ",
+        primary_leveraged_symbol=OVERSEAS_PRIMARY_LEVERAGED_SYMBOL,
+        primary_leveraged_display_name="TQQQ",
+        alt_assets=OVERSEAS_ALT_ASSETS,
+    )
+
+    domestic_result = run_strategy(
+        market_type="DOMESTIC",
+        title="국내 ETF 추천 시그널",
+        primary_symbol=DOMESTIC_PRIMARY_SYMBOL,
+        primary_display_name=DOMESTIC_PRIMARY_NAME,
+        primary_leveraged_symbol=DOMESTIC_PRIMARY_SYMBOL,
+        primary_leveraged_display_name=DOMESTIC_PRIMARY_NAME,
+        alt_assets=DOMESTIC_ALT_ASSETS,
+    )
+
+    payload = {
+        "title": "국내 / 해외 ETF 추천 시그널",
+        "today_date": today_date,
+        "generated_at_kst": generated_at_kst,
+        "page_notice": "국내/해외 모두 직전 거래일 마감 기준",
+        "markets": {
+            "overseas": overseas_result,
+            "domestic": domestic_result
         },
         "strategy_params": {
             "EMA_FAST_SPAN": EMA_FAST_SPAN,
@@ -551,24 +661,13 @@ def main():
             "BELOW_CONFIRM_BARS": BELOW_CONFIRM_BARS,
             "BELOW_LOOKBACK_BARS": BELOW_LOOKBACK_BARS,
             "BELOW_REQUIRED_COUNT": BELOW_REQUIRED_COUNT
-        },
-        "signal_summary": {
-            "signal": final_signal,
-            "market_state": final_market_state,
-            "reason": reason,
-            "final_trigger": final_trigger,
-            "final_source": final_source
-        },
-        "chart_data": {
-            "labels": primary_result["chart_data"]["labels"],
-            "close_data": primary_result["chart_data"]["close_data"],
-            "ema5_data": primary_result["chart_data"]["ema5_data"],
-            "ema20_data": primary_result["chart_data"]["ema20_data"]
         }
     }
 
     with open("signal.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    print("signal.json 생성 완료")
 
 
 if __name__ == "__main__":
