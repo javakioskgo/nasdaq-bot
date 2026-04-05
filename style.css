@@ -280,3 +280,117 @@ body {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0b1020;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 24px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #131a2a;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 20px;
+  }
+
+  .title {
+    font-size: 34px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .sub {
+    color: #9ca3af;
+    margin: 6px 0;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .top-pick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .top-pick-box {
+    background: #0b1a33;
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px solid #374151;
+  }
+
+  .pick-label {
+    font-size: 16px;
+    color: #93c5fd;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .pick-value {
+    font-size: 30px;
+    font-weight: 900;
+    color: #f8fafc;
+    margin-bottom: 8px;
+  }
+
+  .pick-date {
+    font-size: 14px;
+    color: #9ca3af;
+  }
+
+  .reason {
+    background: #0b1a33;
+    border-radius: 16px;
+    padding: 16px;
+    line-height: 1.7;
+    margin-top: 14px;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .metric {
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .metric .label {
+    color: #9ca3af;
+    margin-bottom: 8px;
+  }
+
+  .metric .value {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  @media (max-width: 768px) {
+    .top-pick-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
