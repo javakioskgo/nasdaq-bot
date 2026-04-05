@@ -1,111 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TQQQ 우선 / 대체자산 추천 시그널</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>국내 / 해외 ETF 추천 시그널</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header-card, .market-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 20px;
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .sub {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .hero {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 700;
+    }
+    .reason-box {
+      background: #f9fafb;
+      border-left: 4px solid #2563eb;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .metric {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .metric .label {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .metric .value {
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <header class="hero card">
-      <div>
-        <h1 id="page-title">TQQQ 우선 / 대체자산 추천 시그널</h1>
-        <p class="muted">전일 QQQ 종가 기준 신호 앱</p>
-        <p class="muted" id="today-date">오늘 날짜: -</p>
-        <p class="muted" id="signal-date">기준일: -</p>
-      </div>
-      <div class="hero-right">
-        <div id="signal-badge" class="badge">오늘 대응: -</div>
-      </div>
-    </header>
+    <div class="header-card">
+      <div class="title" id="page-title">국내 / 해외 ETF 추천 시그널</div>
+      <div class="sub" id="generated-at"></div>
+      <div class="sub" id="page-notice"></div>
+    </div>
 
-    <section class="grid">
-      <div class="card">
-        <div class="reason-title">최종 판단 사유</div>
-        <div class="reason" id="reason">불러오는 중...</div>
-
-        <div class="metric-grid">
-          <div class="metric">
-            <div class="label">QQQ 전일 종가</div>
-            <div class="value" id="last-close">-</div>
-          </div>
-          <div class="metric">
-            <div class="label">전일 대비</div>
-            <div class="value" id="daily-return">-</div>
-          </div>
-          <div class="metric">
-            <div class="label">EMA5</div>
-            <div class="value" id="ema5">-</div>
-          </div>
-          <div class="metric">
-            <div class="label">EMA20</div>
-            <div class="value" id="ema20">-</div>
-          </div>
-          <div class="metric">
-            <div class="label">EMA5 기울기</div>
-            <div class="value" id="ema5-slope">-</div>
-          </div>
-          <div class="metric">
-            <div class="label">EMA20 기울기</div>
-            <div class="value" id="ema20-slope">-</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="title-sm">최종 판단 근거</div>
-        <div id="final-trigger" class="final-trigger">-</div>
-
-        <div class="title-sm" style="margin-top:20px;">QQQ 전략 체크</div>
-        <div class="check-row"><span>5EMA > 20EMA</span><span id="cond-ema-cross">-</span></div>
-        <div class="check-row"><span>20EMA 기울기 > 0</span><span id="cond-ema20-up">-</span></div>
-        <div class="check-row"><span>5EMA 기울기 > 0</span><span id="cond-ema5-up">-</span></div>
-        <div class="check-row"><span>QQQ 전일 -3% 급락</span><span id="cond-emergency-exit">-</span></div>
-        <div class="check-row"><span>20EMA 아래 2봉 연속</span><span id="cond-below-2">-</span></div>
-        <div class="check-row"><span>최근 5봉 중 3봉 이상 20EMA 아래</span><span id="cond-below-5-3">-</span></div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <div class="title-sm">QQQ 1차 판단 결과</div>
-        <div id="primary-trigger" class="final-trigger">-</div>
-
-        <div class="check-row" style="margin-top:16px;">
-          <span>QQQ 판정</span>
-          <span id="primary-recommendation">-</span>
-        </div>
-        <div class="check-row">
-          <span>시장 상태</span>
-          <span id="primary-market-state">-</span>
-        </div>
-
-        <div class="reason" id="primary-reason" style="margin-top:16px;">-</div>
-      </div>
-
-      <div class="card">
-        <div class="title-sm">대체자산 선택 근거</div>
-        <div id="alt-selected">불러오는 중...</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="title-sm">대체자산 검토 결과</div>
-      <div id="alt-candidates" class="alt-candidates">불러오는 중...</div>
-    </section>
-
-    <section class="card">
-      <div class="title-sm">QQQ 차트 (최근 60거래일)</div>
-      <canvas id="chart" height="120"></canvas>
-    </section>
-
-    <footer class="footer">
-      <p>GitHub Pages 정적 웹페이지 + GitHub Actions 매일 자동 갱신</p>
-    </footer>
+    <div class="grid">
+      <div class="market-card" id="overseas-card"></div>
+      <div class="market-card" id="domestic-card"></div>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app.js"></script>
+  <script>
+    function metric(label, value) {
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value">${value}</div>
+        </div>
+      `;
+    }
+
+    function renderMarket(title, market) {
+      const primary = market.primary_review;
+      return `
+        <div class="section-title">${title}</div>
+        <div class="small">기준일: ${market.signal_date} (직전 거래일 마감 기준)</div>
+
+        <div class="hero">
+          <div class="badge">오늘 추천: ${market.signal_display_name}</div>
+          <div class="badge">상태: ${market.final_market_state}</div>
+        </div>
+
+        <div class="reason-box">
+          <strong>선정 이유</strong><br/>
+          ${market.reason}
+        </div>
+
+        <div class="reason-box">
+          <strong>1차 판단 자산</strong><br/>
+          ${primary.display_name} / 판정: ${primary.recommendation} / 상태: ${primary.market_state}
+        </div>
+
+        <div class="metric-grid">
+          ${metric("종가", primary.display.last_close)}
+          ${metric("일간수익률", primary.display.daily_return)}
+          ${metric("EMA5", primary.display.ema5)}
+          ${metric("EMA20", primary.display.ema20)}
+          ${metric("EMA5 기울기", primary.display.ema5_slope)}
+          ${metric("EMA20 기울기", primary.display.ema20_slope)}
+        </div>
+
+        <div class="small">트리거: ${market.final_trigger}</div>
+      `;
+    }
+
+    fetch("./signal.json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("page-title").textContent = data.title;
+        document.getElementById("generated-at").textContent =
+          `생성 시각: ${data.generated_at_kst}`;
+        document.getElementById("page-notice").textContent = data.page_notice;
+
+        document.getElementById("overseas-card").innerHTML =
+          renderMarket("해외 ETF", data.markets.overseas);
+
+        document.getElementById("domestic-card").innerHTML =
+          renderMarket("국내 ETF", data.markets.domestic);
+      })
+      .catch(err => {
+        document.body.innerHTML = `<pre>signal.json 로드 실패\n${err}</pre>`;
+      });
+  </script>
 </body>
 </html>
