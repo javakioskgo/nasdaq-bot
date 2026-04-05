@@ -15,8 +15,7 @@ PRIMARY_LEVERAGED_SYMBOL = "TQQQ"
 ALT_ASSETS = [
     {"base": "SOXX", "leveraged": "SOXL", "priority": 1},  # 반도체
     {"base": "XLE", "leveraged": "ERX", "priority": 2},    # 에너지
-    {"base": "IBB", "leveraged": "LABU", "priority": 3},   # 바이오 (XBI로 바꿔도 OK)
-    {"base": "GLD", "leveraged": "UGL", "priority": 4},    # 금
+    {"base": "GLD", "leveraged": "UGL", "priority": 3},    # 금
 ]
 
 DOWNLOAD_PERIOD = "6mo"
