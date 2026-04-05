@@ -192,27 +192,20 @@ def download_close_series_overseas(symbol: str) -> pd.Series:
 def download_close_series_domestic(symbol_or_name: str) -> pd.Series:
     if symbol_or_name.isdigit() and len(symbol_or_name) == 6:
         code = symbol_or_name
-        display_name = symbol_or_name
     else:
         code = resolve_domestic_etf_code_by_name(symbol_or_name)
-        display_name = symbol_or_name
-
-    print(f"[DOMESTIC] requested={symbol_or_name}, resolved_code={code}")
 
     df = fdr.DataReader(code)
 
     if df.empty:
-        raise ValueError(f"{display_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
+        raise ValueError(f"{symbol_or_name} ({code}) 국내 ETF 데이터를 가져오지 못했습니다.")
 
     close = safe_series_close_from_fdr(df)
-
-    # 최근 6개월 수준만 사용
     close = close.tail(180)
 
     if len(close) < MIN_REQUIRED_BARS:
-        raise ValueError(f"{display_name} ({code}) 국내 ETF 유효 종가 데이터가 충분하지 않습니다.")
+        raise ValueError(f"{symbol_or_name} ({code}) 데이터 부족")
 
-    print(f"[DOMESTIC] last_date={close.index[-1].strftime('%Y-%m-%d')}, last_close={close.iloc[-1]}")
     return close
 
 
