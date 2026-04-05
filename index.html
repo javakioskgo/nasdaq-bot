@@ -190,14 +190,14 @@ function metric(label, value) {
 }
 
 /* 하단 카드 렌더링 */
-function renderMarket(title, market) {
+function renderMarket(title, market, type) {
   if (!market) return `<div>데이터 없음</div>`;
 
   const p = market.primary_review || {};
   const d = p.display || {};
 
   return `
-    <div class="section-title">${title}</div>
+    <div class="section-title ${type}">${title}</div>
 
     <div class="reason">
       <strong>선정 이유</strong><br/>
@@ -255,10 +255,10 @@ fetch("./signal.json?v=" + Date.now())
 
     /* REASON */
     document.getElementById("domestic-card").innerHTML =
-      renderMarket("국내 ETF 이유 설명", domestic);
+      renderMarket("🇰🇷 국내 ETF 이유 설명", domestic, "domestic")
 
     document.getElementById("overseas-card").innerHTML =
-      renderMarket("해외 ETF 이유 설명", overseas);
+      renderMarket("🌍 해외 ETF 이유 설명", overseas, "overseas")
   })
   .catch(err => {
     document.body.innerHTML = `<pre>에러 발생\n${err}</pre>`;
