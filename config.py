@@ -16,5 +16,5 @@ EMAIL_SMTP_SERVER = "smtp.gmail.com"
 EMAIL_SMTP_PORT = 587
 
 EMAIL_ADDRESS = "joonooyuni@gmail.com"
-EMAIL_APP_PASSWORD = "jhs0719^^^^^"
+EMAIL_APP_PASSWORD = "ifbirgmxwvwrvsey"
 EMAIL_TO = "joonooyuni@gmail.com"
