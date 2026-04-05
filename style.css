@@ -324,6 +324,14 @@ body {
     font-weight: 800;
     margin-bottom: 16px;
   }
+  
+  .section-title.domestic {
+    color: #60a5fa;
+  }
+
+  .section-title.overseas {
+    color: #a78bfa;
+  }
 
   .top-pick-grid {
     display: grid;
