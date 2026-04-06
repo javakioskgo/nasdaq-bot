@@ -2,3 +2,4 @@ pandas
 yfinance
 pykrx
 finance-datareader
+ib_insync
