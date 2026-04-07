@@ -3,7 +3,11 @@ name: Update signal.json
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 21 * * 1-5'
+    # 🇰🇷 국내장 마감 후 (15:40 KST = 06:40 UTC)
+    - cron: '40 6 * * 1-5'
+
+    # 🇺🇸 미국장 마감 후 (서머타임 기준 06:10 KST = 21:10 UTC 전날)
+    - cron: '10 21 * * 1-5'
 
 permissions:
   contents: write
@@ -11,6 +15,7 @@ permissions:
 jobs:
   update-signal:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
