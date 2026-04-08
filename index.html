@@ -71,6 +71,7 @@ body {
   font-weight: 900;
   color: #22d3ee;
   margin-bottom: 10px;
+  word-break: keep-all;
 }
 
 .pick-value.cash {
@@ -80,6 +81,75 @@ body {
 .pick-date {
   font-size: 13px;
   color: #9ca3af;
+}
+
+/* ===== ACTION CARDS ===== */
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.action-box {
+  border-radius: 22px;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  min-height: 180px;
+}
+
+.action-box.buy {
+  background: linear-gradient(135deg, #0b3b2e, #14532d);
+}
+
+.action-box.sell {
+  background: linear-gradient(135deg, #3b0b12, #7f1d1d);
+}
+
+.action-box.sideways {
+  background: linear-gradient(135deg, #2f2a0b, #6b5f16);
+}
+
+.action-title {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.action-market {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.action-market:last-child {
+  margin-bottom: 0;
+}
+
+.action-market-label {
+  font-size: 13px;
+  color: #d1d5db;
+  margin-bottom: 8px;
+}
+
+.action-symbol {
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  word-break: keep-all;
+}
+
+.action-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e5e7eb;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #cbd5e1;
+  line-height: 1.6;
 }
 
 /* ===== REASON ===== */
@@ -120,6 +190,12 @@ body {
 
 /* ===== MOBILE ===== */
 
+@media (max-width: 900px) {
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .top-pick-grid {
     grid-template-columns: 1fr;
@@ -127,6 +203,10 @@ body {
 
   .pick-value {
     font-size: 34px;
+  }
+
+  .action-symbol {
+    font-size: 22px;
   }
 }
 </style>
@@ -141,9 +221,9 @@ body {
     <div class="sub" id="page-notice"></div>
   </div>
 
-  <!-- 🔥 TOP PICK -->
+  <!-- 오늘 추천 -->
   <div class="card">
-    <div class="section-title">오늘 추천</div>
+    <div class="section-title">오늘 추천 (매수)</div>
 
     <div class="top-pick-grid">
       <div class="top-pick-box">
@@ -160,15 +240,35 @@ body {
     </div>
   </div>
 
-  <!-- 🔥 REASON -->
+  <!-- 액션 카드 3종 -->
+  <div class="card">
+    <div class="section-title">전략 액션 요약</div>
+
+    <div class="action-grid">
+      <div class="action-box buy">
+        <div class="action-title">🟢 오늘 추천 (매수)</div>
+        <div id="buy-card-content"></div>
+      </div>
+
+      <div class="action-box sell">
+        <div class="action-title">🔴 보유금지 (매도)</div>
+        <div id="sell-card-content"></div>
+      </div>
+
+      <div class="action-box sideways">
+        <div class="action-title">🟡 횡보 (판단보류)</div>
+        <div id="sideways-card-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이유 설명 -->
   <div class="card" id="domestic-card"></div>
   <div class="card" id="overseas-card"></div>
 
 </div>
 
 <script>
-
-/* 🔥 상태 한글 변환 */
 function translateMarketState(state) {
   if (state === "UPTREND_RECOVERY") return "상승 추세";
   if (state === "EARLY_UPTREND") return "초기 상승";
@@ -178,7 +278,9 @@ function translateMarketState(state) {
   if (state === "UNCLEAR") return "불명확";
   return state || "-";
 }
+
 function translateText(text) {
+  if (!text) return "-";
   return text
     .replaceAll("UNCLEAR", "불명확")
     .replaceAll("SIDEWAYS", "횡보")
@@ -188,8 +290,6 @@ function translateText(text) {
     .replaceAll("EMERGENCY_EXIT", "긴급 이탈");
 }
 
-  
-/* 카드 metric */
 function metric(label, value) {
   return `
     <div class="metric">
@@ -199,7 +299,6 @@ function metric(label, value) {
   `;
 }
 
-/* 하단 카드 렌더링 */
 function renderMarket(title, market, type) {
   if (!market) return `<div>데이터 없음</div>`;
 
@@ -216,7 +315,7 @@ function renderMarket(title, market, type) {
 
     <div class="reason">
       <strong>판단</strong><br/>
-      ${p.display_name} / ${p.recommendation} / ${translateMarketState(p.market_state)}
+      ${p.display_name || "-"} / ${p.recommendation || "-"} / ${translateMarketState(p.market_state)}
     </div>
 
     <div class="metric-grid">
@@ -230,50 +329,164 @@ function renderMarket(title, market, type) {
   `;
 }
 
-/* 데이터 로드 */
+function renderActionMarket(label, symbol, desc) {
+  return `
+    <div class="action-market">
+      <div class="action-market-label">${label}</div>
+      <div class="action-symbol">${symbol || "-"}</div>
+      <div class="action-desc">${desc || "-"}</div>
+    </div>
+  `;
+}
+
+function buildBuyCard(domestic, overseas) {
+  return `
+    ${renderActionMarket(
+      "🇰🇷 국내 ETF",
+      domestic?.signal_display_name || "-",
+      `현재 전략상 보유 추천 종목입니다. 기준일: ${domestic?.signal_date || "-"}`
+    )}
+    ${renderActionMarket(
+      "🌍 해외 ETF",
+      overseas?.signal_display_name || "-",
+      `현재 전략상 보유 추천 종목입니다. 기준일: ${overseas?.signal_date || "-"}`
+    )}
+  `;
+}
+
+function getSellInfo(market) {
+  const p = market?.primary_review || {};
+  const state = p.market_state || "";
+  const name = p.display_name || "-";
+
+  if (state === "DOWNTREND_CONFIRMED") {
+    return {
+      symbol: name,
+      desc: `하락 추세로 판단되어 보유 비추천입니다. 보유 중이면 매도 대상입니다.`
+    };
+  }
+
+  if (state === "EMERGENCY_EXIT") {
+    return {
+      symbol: name,
+      desc: `긴급 이탈 조건이 발생했습니다. 보유 중이면 즉시 매도 대상입니다.`
+    };
+  }
+
+  if (state === "UNCLEAR") {
+    return {
+      symbol: name,
+      desc: `추세가 불명확해 보유 비추천입니다. 보유 중이면 매도 또는 비보유 유지 대상입니다.`
+    };
+  }
+
+  return null;
+}
+
+function buildSellCard(domestic, overseas) {
+  const items = [];
+
+  const domesticSell = getSellInfo(domestic);
+  const overseasSell = getSellInfo(overseas);
+
+  if (domesticSell) {
+    items.push(renderActionMarket("🇰🇷 국내 ETF", domesticSell.symbol, domesticSell.desc));
+  }
+
+  if (overseasSell) {
+    items.push(renderActionMarket("🌍 해외 ETF", overseasSell.symbol, overseasSell.desc));
+  }
+
+  if (items.length === 0) {
+    return `<div class="empty-text">현재 보유금지(매도) 대상 종목이 없습니다.</div>`;
+  }
+
+  return items.join("");
+}
+
+function getSidewaysInfo(market) {
+  const p = market?.primary_review || {};
+  const state = p.market_state || "";
+  const name = p.display_name || "-";
+
+  if (state === "SIDEWAYS") {
+    return {
+      symbol: name,
+      desc: `횡보 구간으로 판단되어 신규 진입과 추가 매수는 보류 대상입니다.`
+    };
+  }
+
+  return null;
+}
+
+function buildSidewaysCard(domestic, overseas) {
+  const items = [];
+
+  const domesticSideways = getSidewaysInfo(domestic);
+  const overseasSideways = getSidewaysInfo(overseas);
+
+  if (domesticSideways) {
+    items.push(renderActionMarket("🇰🇷 국내 ETF", domesticSideways.symbol, domesticSideways.desc));
+  }
+
+  if (overseasSideways) {
+    items.push(renderActionMarket("🌍 해외 ETF", overseasSideways.symbol, overseasSideways.desc));
+  }
+
+  if (items.length === 0) {
+    return `<div class="empty-text">현재 횡보(판단보류) 대상 종목이 없습니다.</div>`;
+  }
+
+  return items.join("");
+}
+
 fetch("./signal.json?v=" + Date.now())
   .then(r => r.json())
   .then(data => {
+    const domestic = data.markets?.domestic;
+    const overseas = data.markets?.overseas;
 
-    const domestic = data.markets.domestic;
-    const overseas = data.markets.overseas;
-
-    document.getElementById("page-title").textContent = data.title;
+    document.getElementById("page-title").textContent = data.title || "ETF Signal";
     document.getElementById("generated-at").textContent =
-      `생성 시각: ${data.generated_at_kst}`;
+      `생성 시각: ${data.generated_at_kst || "-"}`;
     document.getElementById("page-notice").textContent =
-      data.page_notice;
+      data.page_notice || "-";
 
-    /* TOP PICK */
-    const domVal = domestic.signal_display_name;
+    // 오늘 추천
+    const domVal = domestic?.signal_display_name || "-";
     const domEl = document.getElementById("domestic-top-pick");
     domEl.textContent = domVal;
-
     if (domVal === "CASH") domEl.classList.add("cash");
-
     document.getElementById("domestic-top-date").textContent =
-      `기준일: ${domestic.signal_date}`;
+      `기준일: ${domestic?.signal_date || "-"}`;
 
-    const overVal = overseas.signal_display_name;
+    const overVal = overseas?.signal_display_name || "-";
     const overEl = document.getElementById("overseas-top-pick");
     overEl.textContent = overVal;
-
     if (overVal === "CASH") overEl.classList.add("cash");
-
     document.getElementById("overseas-top-date").textContent =
-      `기준일: ${overseas.signal_date}`;
+      `기준일: ${overseas?.signal_date || "-"}`;
 
-    /* REASON */
+    // 액션 카드 3종
+    document.getElementById("buy-card-content").innerHTML =
+      buildBuyCard(domestic, overseas);
+
+    document.getElementById("sell-card-content").innerHTML =
+      buildSellCard(domestic, overseas);
+
+    document.getElementById("sideways-card-content").innerHTML =
+      buildSidewaysCard(domestic, overseas);
+
+    // 이유 설명
     document.getElementById("domestic-card").innerHTML =
-      renderMarket("🇰🇷 국내 ETF 이유 설명", domestic, "domestic")
+      renderMarket("🇰🇷 국내 ETF 이유 설명", domestic, "domestic");
 
     document.getElementById("overseas-card").innerHTML =
-      renderMarket("🌍 해외 ETF 이유 설명", overseas, "overseas")
+      renderMarket("🌍 해외 ETF 이유 설명", overseas, "overseas");
   })
   .catch(err => {
     document.body.innerHTML = `<pre>에러 발생\n${err}</pre>`;
   });
-
 </script>
 
 </body>
