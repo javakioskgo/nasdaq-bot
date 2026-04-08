@@ -3,210 +3,117 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ETF Signal</title>
+<title>ETF 전략</title>
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #070d1f;
-  color: #e5e7eb;
   margin: 0;
-  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #020617;
+  color: white;
+  padding: 16px;
+  overflow-x: hidden;
 }
 
 .container {
   max-width: 1100px;
   margin: 0 auto;
+  width: 100%;
 }
 
-.card {
-  background: #111827;
-  border-radius: 22px;
-  padding: 22px;
+/* 상단 카드 */
+.header {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 20px;
+  padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-.title {
-  font-size: 32px;
-  font-weight: 900;
-  margin-bottom: 10px;
+.header h1 {
+  margin: 0;
+  font-size: 26px;
 }
 
 .sub {
-  color: #9ca3af;
-  margin: 4px 0;
+  opacity: 0.7;
+  font-size: 14px;
 }
 
-.section-title {
-  font-size: 26px;
-  font-weight: 800;
-  margin-bottom: 14px;
-}
-
-/* ===== TOP PICK ===== */
-
+/* 추천 카드 */
 .top-pick-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 
 .top-pick-box {
-  border-radius: 22px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 20px;
   background: linear-gradient(135deg, #0f172a, #1e3a8a);
-  border: 1px solid rgba(255,255,255,0.1);
   text-align: center;
+  overflow: hidden;
 }
 
 .pick-label {
-  font-size: 14px;
-  color: #94a3b8;
-  margin-bottom: 8px;
+  opacity: 0.7;
+  font-size: 13px;
 }
 
 .pick-value {
-  font-size: 42px;
+  font-size: 32px;
   font-weight: 900;
   color: #22d3ee;
-  margin-bottom: 10px;
   word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
 }
 
-.pick-value.cash {
-  color: #f87171;
+/* 카드 공통 */
+.section {
+  margin-top: 28px;
 }
 
-.pick-date {
-  font-size: 13px;
-  color: #9ca3af;
-}
-
-/* ===== ACTION SUMMARY ===== */
-
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.action-box {
-  border-radius: 22px;
-  padding: 22px;
-  border: 1px solid rgba(255,255,255,0.08);
-  min-height: 220px;
-}
-
-.action-box.buy {
-  background: linear-gradient(135deg, #0b3b2e, #14532d);
-}
-
-.action-box.sell {
-  background: linear-gradient(135deg, #3b0b12, #7f1d1d);
-}
-
-.action-box.sideways {
-  background: linear-gradient(135deg, #2f2a0b, #6b5f16);
-}
-
-.action-title {
-  font-size: 22px;
-  font-weight: 900;
+.section h2 {
   margin-bottom: 14px;
 }
 
-.action-market {
-  background: rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 14px;
+.card {
+  border-radius: 18px;
+  padding: 18px;
   margin-bottom: 12px;
 }
 
-.action-market:last-child {
-  margin-bottom: 0;
+.buy {
+  background: linear-gradient(135deg, #065f46, #10b981);
 }
 
-.action-market-label {
+.sell {
+  background: linear-gradient(135deg, #7f1d1d, #ef4444);
+}
+
+.hold {
+  background: linear-gradient(135deg, #78350f, #f59e0b);
+}
+
+.symbol {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.desc {
   font-size: 13px;
-  color: #d1d5db;
-  margin-bottom: 8px;
+  opacity: 0.85;
+  margin-top: 6px;
 }
 
-.action-symbol {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 8px;
-  word-break: keep-all;
-}
-
-.action-desc {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #e5e7eb;
-}
-
-.empty-text {
-  font-size: 14px;
-  color: #cbd5e1;
-  line-height: 1.6;
-}
-
-/* ===== REASON ===== */
-
-.reason {
-  background: #0b1a33;
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 12px;
-  line-height: 1.8;
-  font-size: 15px;
-}
-
-/* ===== METRIC ===== */
-
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.metric {
-  border: 1px solid #374151;
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.metric .label {
-  color: #9ca3af;
-  margin-bottom: 6px;
-}
-
-.metric .value {
-  font-size: 22px;
-  font-weight: 800;
-}
-
-/* ===== MOBILE ===== */
-
-@media (max-width: 900px) {
-  .action-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
+/* 모바일 */
 @media (max-width: 768px) {
   .top-pick-grid {
     grid-template-columns: 1fr;
   }
 
   .pick-value {
-    font-size: 34px;
-  }
-
-  .action-symbol {
-    font-size: 20px;
+    font-size: 24px;
   }
 }
 </style>
@@ -215,238 +122,80 @@ body {
 <body>
 <div class="container">
 
-  <div class="card">
-    <div class="title" id="page-title"></div>
-    <div class="sub" id="generated-at"></div>
-    <div class="sub" id="page-notice"></div>
+  <div class="header">
+    <h1>국내 / 해외 ETF 보유전략</h1>
+    <div class="sub" id="time"></div>
   </div>
 
-  <!-- 오늘 추천 -->
-  <div class="card">
-    <div class="section-title">오늘 추천 (매수)</div>
-
-    <div class="top-pick-grid">
-      <div class="top-pick-box">
-        <div class="pick-label">🇰🇷 국내 ETF</div>
-        <div class="pick-value" id="domestic-top-pick">-</div>
-        <div class="pick-date" id="domestic-top-date"></div>
-      </div>
-
-      <div class="top-pick-box">
-        <div class="pick-label">🌍 해외 ETF</div>
-        <div class="pick-value" id="overseas-top-pick">-</div>
-        <div class="pick-date" id="overseas-top-date"></div>
-      </div>
-    </div>
+  <div class="section">
+    <h2>오늘 추천 (매수)</h2>
+    <div class="top-pick-grid" id="top-picks"></div>
   </div>
 
-  <!-- 액션 카드 -->
-  <div class="card">
-    <div class="section-title">전략 액션 요약</div>
-
-    <div class="action-grid">
-      <div class="action-box buy">
-        <div class="action-title">🟢 오늘 추천 (매수)</div>
-        <div id="buy-card-content"></div>
-      </div>
-
-      <div class="action-box sell">
-        <div class="action-title">🔴 보유금지 (매도)</div>
-        <div id="sell-card-content"></div>
-      </div>
-
-      <div class="action-box sideways">
-        <div class="action-title">🟡 횡보 (판단보류)</div>
-        <div id="sideways-card-content"></div>
-      </div>
-    </div>
+  <div class="section">
+    <h2>전략 액션 요약</h2>
+    <div id="actions"></div>
   </div>
-
-  <!-- 이유 설명 -->
-  <div class="card" id="domestic-card"></div>
-  <div class="card" id="overseas-card"></div>
 
 </div>
 
 <script>
-function translateMarketState(state) {
-  if (state === "UPTREND_RECOVERY") return "상승 추세";
-  if (state === "EARLY_UPTREND") return "초기 상승";
-  if (state === "DOWNTREND_CONFIRMED") return "하락 추세";
-  if (state === "SIDEWAYS") return "횡보";
-  if (state === "EMERGENCY_EXIT") return "긴급 이탈";
-  if (state === "UNCLEAR") return "불명확";
-  return state || "-";
-}
-
-function translateActionBucket(bucket) {
-  if (bucket === "BUY") return "매수";
-  if (bucket === "SELL") return "매도";
-  if (bucket === "SIDEWAYS") return "판단보류";
-  return bucket || "-";
-}
-
-function translateText(text) {
-  if (!text) return "-";
-  return text
-    .replaceAll("UNCLEAR", "불명확")
-    .replaceAll("SIDEWAYS", "횡보")
-    .replaceAll("UPTREND_RECOVERY", "상승 추세")
-    .replaceAll("EARLY_UPTREND", "초기 상승")
-    .replaceAll("DOWNTREND_CONFIRMED", "하락 추세")
-    .replaceAll("EMERGENCY_EXIT", "긴급 이탈");
-}
-
-function metric(label, value) {
-  return `
-    <div class="metric">
-      <div class="label">${label}</div>
-      <div class="value">${value ?? "-"}</div>
-    </div>
-  `;
-}
-
-function renderMarket(title, market, type) {
-  if (!market) return `<div>데이터 없음</div>`;
-
-  const p = market.primary_review || {};
-  const d = p.display || {};
-
-  return `
-    <div class="section-title ${type}">${title}</div>
-
-    <div class="reason">
-      <strong>선정 이유</strong><br/>
-      ${translateText(market.reason)}
-    </div>
-
-    <div class="reason">
-      <strong>판단</strong><br/>
-      ${p.display_name || "-"} / ${p.recommendation || "-"} / ${translateMarketState(p.market_state)}
-    </div>
-
-    <div class="metric-grid">
-      ${metric("종가", d.last_close)}
-      ${metric("수익률", d.daily_return)}
-      ${metric("EMA5", d.ema5)}
-      ${metric("EMA20", d.ema20)}
-      ${metric("EMA5 기울기", d.ema5_slope)}
-      ${metric("EMA20 기울기", d.ema20_slope)}
-    </div>
-  `;
-}
-
-function renderActionMarket(label, symbol, desc) {
-  return `
-    <div class="action-market">
-      <div class="action-market-label">${label}</div>
-      <div class="action-symbol">${symbol || "-"}</div>
-      <div class="action-desc">${desc || "-"}</div>
-    </div>
-  `;
-}
-
-function renderAssetItem(asset, marketLabel, mode) {
-  const name = asset.display_name || asset.leveraged_display_name || asset.symbol || "-";
-  const state = translateMarketState(asset.market_state);
-  const reason = translateText(asset.reason);
-  const date = asset.signal_date || "-";
-
-  let desc = "";
-
-  if (mode === "BUY") {
-    desc = `상태: ${state} / 액션: ${translateActionBucket(asset.action_bucket)} / 기준일: ${date}<br/>${reason}`;
-  } else if (mode === "SELL") {
-    desc = `상태: ${state} / 보유 중이면 매도 대상 / 기준일: ${date}<br/>${reason}`;
-  } else if (mode === "SIDEWAYS") {
-    desc = `상태: ${state} / 신규 진입·추가 매수 보류 / 기준일: ${date}<br/>${reason}`;
-  }
-
-  return renderActionMarket(marketLabel, name, desc);
-}
-
-function buildActionSection(domesticAssets, overseasAssets, mode) {
-  const parts = [];
-
-  (domesticAssets || []).forEach(asset => {
-    parts.push(renderAssetItem(asset, "🇰🇷 국내 ETF", mode));
-  });
-
-  (overseasAssets || []).forEach(asset => {
-    parts.push(renderAssetItem(asset, "🌍 해외 ETF", mode));
-  });
-
-  if (parts.length === 0) {
-    if (mode === "BUY") {
-      return `<div class="empty-text">현재 매수 추천 종목이 없습니다.</div>`;
-    }
-    if (mode === "SELL") {
-      return `<div class="empty-text">현재 보유금지(매도) 대상 종목이 없습니다.</div>`;
-    }
-    return `<div class="empty-text">현재 횡보(판단보류) 대상 종목이 없습니다.</div>`;
-  }
-
-  return parts.join("");
-}
-
-fetch("./signal.json?v=" + Date.now())
-  .then(r => r.json())
+fetch('signal.json')
+  .then(res => res.json())
   .then(data => {
-    const domestic = data.markets?.domestic;
-    const overseas = data.markets?.overseas;
 
-    document.getElementById("page-title").textContent = data.title || "ETF Signal";
-    document.getElementById("generated-at").textContent =
-      `생성 시각: ${data.generated_at_kst || "-"}`;
-    document.getElementById("page-notice").textContent =
-      data.page_notice || "-";
+    document.getElementById("time").innerText =
+      "생성 시각: " + data.generated_at;
+
+    const top = document.getElementById("top-picks");
+    const actions = document.getElementById("actions");
+
+    const all = [
+      ...data.domestic,
+      ...data.overseas
+    ];
 
     // 오늘 추천
-    const domVal = domestic?.signal_display_name || "-";
-    const domEl = document.getElementById("domestic-top-pick");
-    domEl.textContent = domVal;
-    if (domVal === "CASH") domEl.classList.add("cash");
-    document.getElementById("domestic-top-date").textContent =
-      `기준일: ${domestic?.signal_date || "-"}`;
+    const buys = all.filter(x => x.action === "BUY");
 
-    const overVal = overseas?.signal_display_name || "-";
-    const overEl = document.getElementById("overseas-top-pick");
-    overEl.textContent = overVal;
-    if (overVal === "CASH") overEl.classList.add("cash");
-    document.getElementById("overseas-top-date").textContent =
-      `기준일: ${overseas?.signal_date || "-"}`;
+    buys.forEach(item => {
+      top.innerHTML += `
+        <div class="top-pick-box">
+          <div class="pick-label">${item.market}</div>
+          <div class="pick-value">${item.name}</div>
+          <div class="sub">${item.date}</div>
+        </div>
+      `;
+    });
 
-    // 새 all_assets_review 구조
-    const domesticAll = domestic?.all_assets_review || {};
-    const overseasAll = overseas?.all_assets_review || {};
+    // 전체 카드
+    all.forEach(item => {
 
-    const domesticBuy = domesticAll.buy_assets || [];
-    const domesticSell = domesticAll.sell_assets || [];
-    const domesticSideways = domesticAll.sideways_assets || [];
+      let type = "hold";
+      let title = "횡보 (판단보류)";
 
-    const overseasBuy = overseasAll.buy_assets || [];
-    const overseasSell = overseasAll.sell_assets || [];
-    const overseasSideways = overseasAll.sideways_assets || [];
+      if (item.action === "BUY") {
+        type = "buy";
+        title = "오늘 추천 (매수)";
+      }
 
-    // 액션 카드
-    document.getElementById("buy-card-content").innerHTML =
-      buildActionSection(domesticBuy, overseasBuy, "BUY");
+      if (item.action === "SELL") {
+        type = "sell";
+        title = "보유금지 (매도)";
+      }
 
-    document.getElementById("sell-card-content").innerHTML =
-      buildActionSection(domesticSell, overseasSell, "SELL");
+      actions.innerHTML += `
+        <div class="card ${type}">
+          <div><b>${title}</b></div>
+          <div class="symbol">${item.name}</div>
+          <div class="desc">
+            상태: ${item.status} / 기준일: ${item.date}
+          </div>
+          <div class="desc">${item.reason}</div>
+        </div>
+      `;
+    });
 
-    document.getElementById("sideways-card-content").innerHTML =
-      buildActionSection(domesticSideways, overseasSideways, "SIDEWAYS");
-
-    // 이유 설명
-    document.getElementById("domestic-card").innerHTML =
-      renderMarket("🇰🇷 국내 ETF 이유 설명", domestic, "domestic");
-
-    document.getElementById("overseas-card").innerHTML =
-      renderMarket("🌍 해외 ETF 이유 설명", overseas, "overseas");
-  })
-  .catch(err => {
-    document.body.innerHTML = `<pre>에러 발생\n${err}</pre>`;
   });
 </script>
 
