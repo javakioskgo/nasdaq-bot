@@ -83,7 +83,7 @@ body {
   color: #9ca3af;
 }
 
-/* ===== ACTION CARDS ===== */
+/* ===== ACTION SUMMARY ===== */
 
 .action-grid {
   display: grid;
@@ -95,7 +95,7 @@ body {
   border-radius: 22px;
   padding: 22px;
   border: 1px solid rgba(255,255,255,0.08);
-  min-height: 180px;
+  min-height: 220px;
 }
 
 .action-box.buy {
@@ -134,7 +134,7 @@ body {
 }
 
 .action-symbol {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 900;
   margin-bottom: 8px;
   word-break: keep-all;
@@ -206,7 +206,7 @@ body {
   }
 
   .action-symbol {
-    font-size: 22px;
+    font-size: 20px;
   }
 }
 </style>
@@ -240,7 +240,7 @@ body {
     </div>
   </div>
 
-  <!-- 액션 카드 3종 -->
+  <!-- 액션 카드 -->
   <div class="card">
     <div class="section-title">전략 액션 요약</div>
 
@@ -277,6 +277,13 @@ function translateMarketState(state) {
   if (state === "EMERGENCY_EXIT") return "긴급 이탈";
   if (state === "UNCLEAR") return "불명확";
   return state || "-";
+}
+
+function translateActionBucket(bucket) {
+  if (bucket === "BUY") return "매수";
+  if (bucket === "SELL") return "매도";
+  if (bucket === "SIDEWAYS") return "판단보류";
+  return bucket || "-";
 }
 
 function translateText(text) {
@@ -339,105 +346,47 @@ function renderActionMarket(label, symbol, desc) {
   `;
 }
 
-function buildBuyCard(domestic, overseas) {
-  return `
-    ${renderActionMarket(
-      "🇰🇷 국내 ETF",
-      domestic?.signal_display_name || "-",
-      `현재 전략상 보유 추천 종목입니다. 기준일: ${domestic?.signal_date || "-"}`
-    )}
-    ${renderActionMarket(
-      "🌍 해외 ETF",
-      overseas?.signal_display_name || "-",
-      `현재 전략상 보유 추천 종목입니다. 기준일: ${overseas?.signal_date || "-"}`
-    )}
-  `;
+function renderAssetItem(asset, marketLabel, mode) {
+  const name = asset.display_name || asset.leveraged_display_name || asset.symbol || "-";
+  const state = translateMarketState(asset.market_state);
+  const reason = translateText(asset.reason);
+  const date = asset.signal_date || "-";
+
+  let desc = "";
+
+  if (mode === "BUY") {
+    desc = `상태: ${state} / 액션: ${translateActionBucket(asset.action_bucket)} / 기준일: ${date}<br/>${reason}`;
+  } else if (mode === "SELL") {
+    desc = `상태: ${state} / 보유 중이면 매도 대상 / 기준일: ${date}<br/>${reason}`;
+  } else if (mode === "SIDEWAYS") {
+    desc = `상태: ${state} / 신규 진입·추가 매수 보류 / 기준일: ${date}<br/>${reason}`;
+  }
+
+  return renderActionMarket(marketLabel, name, desc);
 }
 
-function getSellInfo(market) {
-  const p = market?.primary_review || {};
-  const state = p.market_state || "";
-  const name = p.display_name || "-";
+function buildActionSection(domesticAssets, overseasAssets, mode) {
+  const parts = [];
 
-  if (state === "DOWNTREND_CONFIRMED") {
-    return {
-      symbol: name,
-      desc: `하락 추세로 판단되어 보유 비추천입니다. 보유 중이면 매도 대상입니다.`
-    };
-  }
+  (domesticAssets || []).forEach(asset => {
+    parts.push(renderAssetItem(asset, "🇰🇷 국내 ETF", mode));
+  });
 
-  if (state === "EMERGENCY_EXIT") {
-    return {
-      symbol: name,
-      desc: `긴급 이탈 조건이 발생했습니다. 보유 중이면 즉시 매도 대상입니다.`
-    };
-  }
+  (overseasAssets || []).forEach(asset => {
+    parts.push(renderAssetItem(asset, "🌍 해외 ETF", mode));
+  });
 
-  if (state === "UNCLEAR") {
-    return {
-      symbol: name,
-      desc: `추세가 불명확해 보유 비추천입니다. 보유 중이면 매도 또는 비보유 유지 대상입니다.`
-    };
-  }
-
-  return null;
-}
-
-function buildSellCard(domestic, overseas) {
-  const items = [];
-
-  const domesticSell = getSellInfo(domestic);
-  const overseasSell = getSellInfo(overseas);
-
-  if (domesticSell) {
-    items.push(renderActionMarket("🇰🇷 국내 ETF", domesticSell.symbol, domesticSell.desc));
-  }
-
-  if (overseasSell) {
-    items.push(renderActionMarket("🌍 해외 ETF", overseasSell.symbol, overseasSell.desc));
-  }
-
-  if (items.length === 0) {
-    return `<div class="empty-text">현재 보유금지(매도) 대상 종목이 없습니다.</div>`;
-  }
-
-  return items.join("");
-}
-
-function getSidewaysInfo(market) {
-  const p = market?.primary_review || {};
-  const state = p.market_state || "";
-  const name = p.display_name || "-";
-
-  if (state === "SIDEWAYS") {
-    return {
-      symbol: name,
-      desc: `횡보 구간으로 판단되어 신규 진입과 추가 매수는 보류 대상입니다.`
-    };
-  }
-
-  return null;
-}
-
-function buildSidewaysCard(domestic, overseas) {
-  const items = [];
-
-  const domesticSideways = getSidewaysInfo(domestic);
-  const overseasSideways = getSidewaysInfo(overseas);
-
-  if (domesticSideways) {
-    items.push(renderActionMarket("🇰🇷 국내 ETF", domesticSideways.symbol, domesticSideways.desc));
-  }
-
-  if (overseasSideways) {
-    items.push(renderActionMarket("🌍 해외 ETF", overseasSideways.symbol, overseasSideways.desc));
-  }
-
-  if (items.length === 0) {
+  if (parts.length === 0) {
+    if (mode === "BUY") {
+      return `<div class="empty-text">현재 매수 추천 종목이 없습니다.</div>`;
+    }
+    if (mode === "SELL") {
+      return `<div class="empty-text">현재 보유금지(매도) 대상 종목이 없습니다.</div>`;
+    }
     return `<div class="empty-text">현재 횡보(판단보류) 대상 종목이 없습니다.</div>`;
   }
 
-  return items.join("");
+  return parts.join("");
 }
 
 fetch("./signal.json?v=" + Date.now())
@@ -467,15 +416,27 @@ fetch("./signal.json?v=" + Date.now())
     document.getElementById("overseas-top-date").textContent =
       `기준일: ${overseas?.signal_date || "-"}`;
 
-    // 액션 카드 3종
+    // 새 all_assets_review 구조
+    const domesticAll = domestic?.all_assets_review || {};
+    const overseasAll = overseas?.all_assets_review || {};
+
+    const domesticBuy = domesticAll.buy_assets || [];
+    const domesticSell = domesticAll.sell_assets || [];
+    const domesticSideways = domesticAll.sideways_assets || [];
+
+    const overseasBuy = overseasAll.buy_assets || [];
+    const overseasSell = overseasAll.sell_assets || [];
+    const overseasSideways = overseasAll.sideways_assets || [];
+
+    // 액션 카드
     document.getElementById("buy-card-content").innerHTML =
-      buildBuyCard(domestic, overseas);
+      buildActionSection(domesticBuy, overseasBuy, "BUY");
 
     document.getElementById("sell-card-content").innerHTML =
-      buildSellCard(domestic, overseas);
+      buildActionSection(domesticSell, overseasSell, "SELL");
 
     document.getElementById("sideways-card-content").innerHTML =
-      buildSidewaysCard(domestic, overseas);
+      buildActionSection(domesticSideways, overseasSideways, "SIDEWAYS");
 
     // 이유 설명
     document.getElementById("domestic-card").innerHTML =
