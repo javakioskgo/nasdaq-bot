@@ -401,6 +401,17 @@ def calculate_asset_metrics(symbol: str, market_type: str, display_name: str | N
 
 
 # =========================
+# 액션 버킷 유틸
+# =========================
+def market_state_to_action_bucket(market_state: str, recommendation: bool) -> str:
+    if recommendation:
+        return "BUY"
+    if market_state == "SIDEWAYS":
+        return "SIDEWAYS"
+    return "SELL"
+
+
+# =========================
 # 자산 판정 로직
 # =========================
 def evaluate_asset(
@@ -518,6 +529,8 @@ def evaluate_asset(
         - condition_values["price_distance_pct"] * 0.5
     )
 
+    action_bucket = market_state_to_action_bucket(market_state, recommendation)
+
     return {
         "symbol": symbol,
         "display_name": metrics["display_name"],
@@ -536,6 +549,7 @@ def evaluate_asset(
             else "NOT_RECOMMENDED"
         ),
         "market_state": market_state,
+        "action_bucket": action_bucket,
         "reason": reason,
         "final_trigger": final_trigger,
         "decision_path": decision_path,
@@ -574,6 +588,33 @@ def select_alternative_asset(alt_assets: list[dict], market_type: str) -> tuple[
         key=lambda x: (-x["signal_strength"], -x["score"], x["priority"])
     )
     return recommended[0], alt_results
+
+
+def build_action_item_from_review(
+    result: dict,
+    symbol: str,
+    display_name: str,
+    leveraged_symbol: str,
+    leveraged_display_name: str,
+    role: str
+) -> dict:
+    return {
+        "symbol": symbol,
+        "display_name": display_name,
+        "leveraged_symbol": leveraged_symbol,
+        "leveraged_display_name": leveraged_display_name,
+        "role": role,
+        "recommendation": "추천" if result["recommendation"] else "비추천",
+        "market_state": result["market_state"],
+        "action_bucket": result["action_bucket"],
+        "reason": result["reason"],
+        "final_trigger": result["final_trigger"],
+        "signal_date": result["signal_date"],
+        "score": result["score"],
+        "signal_strength": result["signal_strength"],
+        "signal_strength_label": result["signal_strength_label"],
+        "display": result["display"],
+    }
 
 
 def run_strategy(
@@ -670,6 +711,8 @@ def run_strategy(
             "recommendation": "추천" if alt["recommendation"] else "비추천",
             "signal_strength": alt["signal_strength"],
             "signal_strength_label": alt["signal_strength_label"],
+            "market_state": alt["market_state"],
+            "action_bucket": alt["action_bucket"],
             "reason": alt["reason"],
             "final_trigger": alt["final_trigger"],
             "score": alt["score"],
@@ -682,6 +725,78 @@ def run_strategy(
         if alt_selected else
         "대체자산 모두 비추천"
     )
+
+    # =========================
+    # 전체 자산 리뷰 추가
+    # =========================
+    all_assets_review = []
+
+    if market_type == "OVERSEAS":
+        # 1) QQQ
+        all_assets_review.append(
+            build_action_item_from_review(
+                result=primary_result,
+                symbol=primary_symbol,
+                display_name=primary_display_name,
+                leveraged_symbol=primary_symbol,
+                leveraged_display_name=primary_display_name,
+                role="PRIMARY_BASE"
+            )
+        )
+
+        # 2) TQQQ
+        all_assets_review.append(
+            build_action_item_from_review(
+                result=primary_result,
+                symbol=primary_leveraged_symbol,
+                display_name=primary_leveraged_display_name,
+                leveraged_symbol=primary_leveraged_symbol,
+                leveraged_display_name=primary_leveraged_display_name,
+                role="PRIMARY_LEVERAGED"
+            )
+        )
+
+        # 3) 대체자산들
+        for alt in alt_results:
+            all_assets_review.append(
+                build_action_item_from_review(
+                    result=alt,
+                    symbol=alt["leveraged_symbol"],
+                    display_name=alt["leveraged_display_name"],
+                    leveraged_symbol=alt["leveraged_symbol"],
+                    leveraged_display_name=alt["leveraged_display_name"],
+                    role="ALTERNATIVE"
+                )
+            )
+
+    else:
+        # 국내는 4개 그대로
+        all_assets_review.append(
+            build_action_item_from_review(
+                result=primary_result,
+                symbol=primary_symbol,
+                display_name=primary_display_name,
+                leveraged_symbol=primary_symbol,
+                leveraged_display_name=primary_display_name,
+                role="PRIMARY"
+            )
+        )
+
+        for alt in alt_results:
+            all_assets_review.append(
+                build_action_item_from_review(
+                    result=alt,
+                    symbol=alt["leveraged_symbol"],
+                    display_name=alt["leveraged_display_name"],
+                    leveraged_symbol=alt["leveraged_symbol"],
+                    leveraged_display_name=alt["leveraged_display_name"],
+                    role="ALTERNATIVE"
+                )
+            )
+
+    buy_assets = [x for x in all_assets_review if x["action_bucket"] == "BUY"]
+    sell_assets = [x for x in all_assets_review if x["action_bucket"] == "SELL"]
+    sideways_assets = [x for x in all_assets_review if x["action_bucket"] == "SIDEWAYS"]
 
     return {
         "title": title,
@@ -699,6 +814,7 @@ def run_strategy(
             "leveraged_display_name": primary_result["leveraged_display_name"],
             "recommendation": "추천" if primary_result["recommendation"] else "비추천",
             "market_state": primary_result["market_state"],
+            "action_bucket": primary_result["action_bucket"],
             "reason": primary_result["reason"],
             "final_trigger": primary_result["final_trigger"],
             "decision_path": primary_result["decision_path"],
@@ -717,11 +833,19 @@ def run_strategy(
                 "leveraged_display_name": alt_selected["leveraged_display_name"],
                 "signal_strength": alt_selected["signal_strength"],
                 "signal_strength_label": alt_selected["signal_strength_label"],
+                "market_state": alt_selected["market_state"],
+                "action_bucket": alt_selected["action_bucket"],
                 "reason": alt_selected["reason"],
                 "final_trigger": alt_selected["final_trigger"],
                 "score": alt_selected["score"]
             } if alt_selected else None,
             "candidates": alt_review_summary
+        },
+        "all_assets_review": {
+            "assets": all_assets_review,
+            "buy_assets": buy_assets,
+            "sell_assets": sell_assets,
+            "sideways_assets": sideways_assets
         },
         "chart_data": {
             "labels": primary_result["chart_data"]["labels"],
