@@ -1,7 +1,7 @@
 {
   "title": "국내 / 해외 ETF 보유전략",
-  "today_date": "2026-10-02",
-  "generated_at_kst": "2026-10-02 22:05:18 KST",
+  "today_date": "2026-10-03",
+  "generated_at_kst": "2026-10-03 09:27:31 KST",
   "page_notice": "국내/해외 모두 직전 거래일 마감 기준",
   "markets": {
     "overseas": {
@@ -59,9 +59,9 @@
           "is_sideways": false
         },
         "condition_values": {
-          "ema20_strength_abs": 1.236441,
+          "ema20_strength_abs": 1.236427,
           "ema20_strength_pct": 0.1703,
-          "price_distance_pct": 2.0404,
+          "price_distance_pct": 2.0403,
           "below_lookback_count": 0,
           "down_acceleration_ratio": 0.886
         },
@@ -72,9 +72,9 @@
         },
         "latest_indicator_info": {
           "ema5_raw": 739.839,
-          "ema20_raw": 727.1927,
+          "ema20_raw": 727.1929,
           "ema5_slope_raw": 1.095535,
-          "ema20_slope_raw": 1.236441,
+          "ema20_slope_raw": 1.236427,
           "ema5_slope_pct": 0.1483,
           "ema20_slope_pct": 0.1703
         }
@@ -98,7 +98,7 @@
             "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 4봉 연속입니다.",
             "final_trigger": "📈 상승 복귀 확인 → 추천",
             "signal_date": "2026-10-01",
-            "score": 1783.1883,
+            "score": 1783.1743,
             "signal_strength": 2,
             "signal_strength_label": "STRONG_UPTREND",
             "display": {
@@ -125,7 +125,7 @@
             "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 4봉 연속입니다.",
             "final_trigger": "📈 상승 복귀 확인 → 추천",
             "signal_date": "2026-10-01",
-            "score": 1783.1883,
+            "score": 1783.1743,
             "signal_strength": 2,
             "signal_strength_label": "STRONG_UPTREND",
             "display": {
@@ -154,7 +154,7 @@
             "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 4봉 연속입니다.",
             "final_trigger": "📈 상승 복귀 확인 → 추천",
             "signal_date": "2026-10-01",
-            "score": 1783.1883,
+            "score": 1783.1743,
             "signal_strength": 2,
             "signal_strength_label": "STRONG_UPTREND",
             "display": {
@@ -181,7 +181,7 @@
             "reason": "상승 복귀 조건 충족: EMA5/EMA20 기울기 양수, 종가가 20EMA 위 4봉 연속입니다.",
             "final_trigger": "📈 상승 복귀 확인 → 추천",
             "signal_date": "2026-10-01",
-            "score": 1783.1883,
+            "score": 1783.1743,
             "signal_strength": 2,
             "signal_strength_label": "STRONG_UPTREND",
             "display": {
