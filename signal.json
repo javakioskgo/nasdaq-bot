@@ -1,7 +1,7 @@
 {
   "title": "국내 / 해외 ETF 보유전략",
-  "today_date": "2026-11-26",
-  "generated_at_kst": "2026-11-26 12:31:02 KST",
+  "today_date": "2026-11-27",
+  "generated_at_kst": "2026-11-27 02:15:25 KST",
   "page_notice": "국내/해외 모두 직전 거래일 마감 기준",
   "markets": {
     "overseas": {
@@ -755,15 +755,15 @@
           "fallback_not_recommended=True"
         ],
         "display": {
-          "last_close": "23,320.00",
-          "daily_return": "+1.68%",
-          "ema5": "23,684.75",
-          "ema20": "25,291.49",
-          "ema5_slope": "-81.0565",
-          "ema20_slope": "-80.4690",
-          "ema5_slope_pct": "-0.3411%",
-          "ema20_slope_pct": "-0.3172%",
-          "price_distance_pct": "7.80%"
+          "last_close": "23,245.00",
+          "daily_return": "+1.35%",
+          "ema5": "23,671.12",
+          "ema20": "25,288.55",
+          "ema5_slope": "-94.6928",
+          "ema20_slope": "-83.4102",
+          "ema5_slope_pct": "-0.3984%",
+          "ema20_slope_pct": "-0.3287%",
+          "price_distance_pct": "8.08%"
         },
         "conditions": {
           "cond_ema_cross": false,
@@ -779,24 +779,24 @@
           "is_sideways": false
         },
         "condition_values": {
-          "ema20_strength_abs": 80.469036,
-          "ema20_strength_pct": 0.3172,
-          "price_distance_pct": 7.7951,
+          "ema20_strength_abs": 83.410212,
+          "ema20_strength_pct": 0.3287,
+          "price_distance_pct": 8.0809,
           "below_lookback_count": 7,
-          "down_acceleration_ratio": 1.0073
+          "down_acceleration_ratio": 1.1353
         },
         "latest_price_info": {
-          "last_close_raw": 23320.0,
+          "last_close_raw": 23245.0,
           "prev_close_raw": 22935.0,
-          "daily_return_pct_raw": 1.68
+          "daily_return_pct_raw": 1.35
         },
         "latest_indicator_info": {
-          "ema5_raw": 23684.7542,
-          "ema20_raw": 25291.4914,
-          "ema5_slope_raw": -81.056478,
-          "ema20_slope_raw": -80.469036,
-          "ema5_slope_pct": -0.3411,
-          "ema20_slope_pct": -0.3172
+          "ema5_raw": 23671.1178,
+          "ema20_raw": 25288.5502,
+          "ema5_slope_raw": -94.692842,
+          "ema20_slope_raw": -83.410212,
+          "ema5_slope_pct": -0.3984,
+          "ema20_slope_pct": -0.3287
         }
       },
       "alt_review": {
@@ -815,17 +815,17 @@
             "action_bucket": "SELL",
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
-            "score": -430655.5636,
+            "score": -453427.6255,
             "display": {
-              "last_close": "31,060.00",
-              "daily_return": "+3.45%",
-              "ema5": "32,576.78",
-              "ema20": "37,481.84",
-              "ema5_slope": "-337.0622",
-              "ema20_slope": "-262.1159",
-              "ema5_slope_pct": "-1.0241%",
-              "ema20_slope_pct": "-0.6945%",
-              "price_distance_pct": "17.13%"
+              "last_close": "30,885.00",
+              "daily_return": "+2.86%",
+              "ema5": "32,544.96",
+              "ema20": "37,474.98",
+              "ema5_slope": "-368.8804",
+              "ema20_slope": "-268.9786",
+              "ema5_slope_pct": "-1.1207%",
+              "ema20_slope_pct": "-0.7126%",
+              "price_distance_pct": "17.59%"
             },
             "conditions": {
               "cond_ema_cross": false,
@@ -853,17 +853,17 @@
             "action_bucket": "SELL",
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
-            "score": -59992.4954,
+            "score": -62595.0395,
             "display": {
-              "last_close": "19,035.00",
-              "daily_return": "+0.93%",
-              "ema5": "19,214.73",
-              "ema20": "20,015.49",
-              "ema5_slope": "-39.9400",
-              "ema20_slope": "-40.0201",
-              "ema5_slope_pct": "-0.2074%",
-              "ema20_slope_pct": "-0.1995%",
-              "price_distance_pct": "4.90%"
+              "last_close": "19,015.00",
+              "daily_return": "+0.82%",
+              "ema5": "19,211.09",
+              "ema20": "20,014.71",
+              "ema5_slope": "-43.5763",
+              "ema20_slope": "-40.8044",
+              "ema5_slope_pct": "-0.2263%",
+              "ema20_slope_pct": "-0.2035%",
+              "price_distance_pct": "4.99%"
             },
             "conditions": {
               "cond_ema_cross": false,
@@ -887,21 +887,21 @@
             "recommendation": "비추천",
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
-            "market_state": "UNCLEAR",
+            "market_state": "DOWNTREND_CONFIRMED",
             "action_bucket": "SELL",
-            "reason": "추세가 명확하지 않아 보유 비추천입니다.",
-            "final_trigger": "⚖️ 방향 불명확 → 비추천",
-            "score": -171834.87,
+            "reason": "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, 20EMA 아래 3봉 + 최근 7봉 중 4봉 이상 아래.",
+            "final_trigger": "📉 하락 전환 확정 → 비추천",
+            "score": -175088.0436,
             "display": {
-              "last_close": "19,940.00",
-              "daily_return": "+1.42%",
-              "ema5": "20,600.78",
-              "ema20": "22,351.03",
-              "ema5_slope": "-146.8400",
-              "ema20_slope": "-98.4095",
-              "ema5_slope_pct": "-0.7077%",
-              "ema20_slope_pct": "-0.4384%",
-              "price_distance_pct": "10.79%"
+              "last_close": "19,915.00",
+              "daily_return": "+1.30%",
+              "ema5": "20,596.23",
+              "ema20": "22,350.05",
+              "ema5_slope": "-151.3854",
+              "ema20_slope": "-99.3899",
+              "ema5_slope_pct": "-0.7297%",
+              "ema20_slope_pct": "-0.4427%",
+              "price_distance_pct": "10.90%"
             },
             "conditions": {
               "cond_ema_cross": false,
@@ -913,7 +913,7 @@
               "cond_above_n": false,
               "cond_below_n": true,
               "cond_below_lookback_required": true,
-              "cond_down_acceleration": false,
+              "cond_down_acceleration": true,
               "is_sideways": false
             }
           }
@@ -933,19 +933,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -121001.1726,
+            "score": -130760.6735,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "23,320.00",
-              "daily_return": "+1.68%",
-              "ema5": "23,684.75",
-              "ema20": "25,291.49",
-              "ema5_slope": "-81.0565",
-              "ema20_slope": "-80.4690",
-              "ema5_slope_pct": "-0.3411%",
-              "ema20_slope_pct": "-0.3172%",
-              "price_distance_pct": "7.80%"
+              "last_close": "23,245.00",
+              "daily_return": "+1.35%",
+              "ema5": "23,671.12",
+              "ema20": "25,288.55",
+              "ema5_slope": "-94.6928",
+              "ema20_slope": "-83.4102",
+              "ema5_slope_pct": "-0.3984%",
+              "ema20_slope_pct": "-0.3287%",
+              "price_distance_pct": "8.08%"
             }
           },
           {
@@ -960,19 +960,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -430655.5636,
+            "score": -453427.6255,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "31,060.00",
-              "daily_return": "+3.45%",
-              "ema5": "32,576.78",
-              "ema20": "37,481.84",
-              "ema5_slope": "-337.0622",
-              "ema20_slope": "-262.1159",
-              "ema5_slope_pct": "-1.0241%",
-              "ema20_slope_pct": "-0.6945%",
-              "price_distance_pct": "17.13%"
+              "last_close": "30,885.00",
+              "daily_return": "+2.86%",
+              "ema5": "32,544.96",
+              "ema20": "37,474.98",
+              "ema5_slope": "-368.8804",
+              "ema20_slope": "-268.9786",
+              "ema5_slope_pct": "-1.1207%",
+              "ema20_slope_pct": "-0.7126%",
+              "price_distance_pct": "17.59%"
             }
           },
           {
@@ -987,19 +987,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -59992.4954,
+            "score": -62595.0395,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "19,035.00",
-              "daily_return": "+0.93%",
-              "ema5": "19,214.73",
-              "ema20": "20,015.49",
-              "ema5_slope": "-39.9400",
-              "ema20_slope": "-40.0201",
-              "ema5_slope_pct": "-0.2074%",
-              "ema20_slope_pct": "-0.1995%",
-              "price_distance_pct": "4.90%"
+              "last_close": "19,015.00",
+              "daily_return": "+0.82%",
+              "ema5": "19,211.09",
+              "ema20": "20,014.71",
+              "ema5_slope": "-43.5763",
+              "ema20_slope": "-40.8044",
+              "ema5_slope_pct": "-0.2263%",
+              "ema20_slope_pct": "-0.2035%",
+              "price_distance_pct": "4.99%"
             }
           },
           {
@@ -1009,24 +1009,24 @@
             "leveraged_display_name": "KODEX 골드선물(H)",
             "role": "ALTERNATIVE",
             "recommendation": "비추천",
-            "market_state": "UNCLEAR",
+            "market_state": "DOWNTREND_CONFIRMED",
             "action_bucket": "SELL",
-            "reason": "추세가 명확하지 않아 보유 비추천입니다.",
-            "final_trigger": "⚖️ 방향 불명확 → 비추천",
+            "reason": "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, 20EMA 아래 3봉 + 최근 7봉 중 4봉 이상 아래.",
+            "final_trigger": "📉 하락 전환 확정 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -171834.87,
+            "score": -175088.0436,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "19,940.00",
-              "daily_return": "+1.42%",
-              "ema5": "20,600.78",
-              "ema20": "22,351.03",
-              "ema5_slope": "-146.8400",
-              "ema20_slope": "-98.4095",
-              "ema5_slope_pct": "-0.7077%",
-              "ema20_slope_pct": "-0.4384%",
-              "price_distance_pct": "10.79%"
+              "last_close": "19,915.00",
+              "daily_return": "+1.30%",
+              "ema5": "20,596.23",
+              "ema20": "22,350.05",
+              "ema5_slope": "-151.3854",
+              "ema20_slope": "-99.3899",
+              "ema5_slope_pct": "-0.7297%",
+              "ema20_slope_pct": "-0.4427%",
+              "price_distance_pct": "10.90%"
             }
           }
         ],
@@ -1044,19 +1044,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -121001.1726,
+            "score": -130760.6735,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "23,320.00",
-              "daily_return": "+1.68%",
-              "ema5": "23,684.75",
-              "ema20": "25,291.49",
-              "ema5_slope": "-81.0565",
-              "ema20_slope": "-80.4690",
-              "ema5_slope_pct": "-0.3411%",
-              "ema20_slope_pct": "-0.3172%",
-              "price_distance_pct": "7.80%"
+              "last_close": "23,245.00",
+              "daily_return": "+1.35%",
+              "ema5": "23,671.12",
+              "ema20": "25,288.55",
+              "ema5_slope": "-94.6928",
+              "ema20_slope": "-83.4102",
+              "ema5_slope_pct": "-0.3984%",
+              "ema20_slope_pct": "-0.3287%",
+              "price_distance_pct": "8.08%"
             }
           },
           {
@@ -1071,19 +1071,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -430655.5636,
+            "score": -453427.6255,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "31,060.00",
-              "daily_return": "+3.45%",
-              "ema5": "32,576.78",
-              "ema20": "37,481.84",
-              "ema5_slope": "-337.0622",
-              "ema20_slope": "-262.1159",
-              "ema5_slope_pct": "-1.0241%",
-              "ema20_slope_pct": "-0.6945%",
-              "price_distance_pct": "17.13%"
+              "last_close": "30,885.00",
+              "daily_return": "+2.86%",
+              "ema5": "32,544.96",
+              "ema20": "37,474.98",
+              "ema5_slope": "-368.8804",
+              "ema20_slope": "-268.9786",
+              "ema5_slope_pct": "-1.1207%",
+              "ema20_slope_pct": "-0.7126%",
+              "price_distance_pct": "17.59%"
             }
           },
           {
@@ -1098,19 +1098,19 @@
             "reason": "추세가 명확하지 않아 보유 비추천입니다.",
             "final_trigger": "⚖️ 방향 불명확 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -59992.4954,
+            "score": -62595.0395,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "19,035.00",
-              "daily_return": "+0.93%",
-              "ema5": "19,214.73",
-              "ema20": "20,015.49",
-              "ema5_slope": "-39.9400",
-              "ema20_slope": "-40.0201",
-              "ema5_slope_pct": "-0.2074%",
-              "ema20_slope_pct": "-0.1995%",
-              "price_distance_pct": "4.90%"
+              "last_close": "19,015.00",
+              "daily_return": "+0.82%",
+              "ema5": "19,211.09",
+              "ema20": "20,014.71",
+              "ema5_slope": "-43.5763",
+              "ema20_slope": "-40.8044",
+              "ema5_slope_pct": "-0.2263%",
+              "ema20_slope_pct": "-0.2035%",
+              "price_distance_pct": "4.99%"
             }
           },
           {
@@ -1120,24 +1120,24 @@
             "leveraged_display_name": "KODEX 골드선물(H)",
             "role": "ALTERNATIVE",
             "recommendation": "비추천",
-            "market_state": "UNCLEAR",
+            "market_state": "DOWNTREND_CONFIRMED",
             "action_bucket": "SELL",
-            "reason": "추세가 명확하지 않아 보유 비추천입니다.",
-            "final_trigger": "⚖️ 방향 불명확 → 비추천",
+            "reason": "하락 전환 조건 충족: EMA5/EMA20 기울기 음수, 하락 가속, 20EMA 아래 3봉 + 최근 7봉 중 4봉 이상 아래.",
+            "final_trigger": "📉 하락 전환 확정 → 비추천",
             "signal_date": "2026-11-26",
-            "score": -171834.87,
+            "score": -175088.0436,
             "signal_strength": 0,
             "signal_strength_label": "NOT_RECOMMENDED",
             "display": {
-              "last_close": "19,940.00",
-              "daily_return": "+1.42%",
-              "ema5": "20,600.78",
-              "ema20": "22,351.03",
-              "ema5_slope": "-146.8400",
-              "ema20_slope": "-98.4095",
-              "ema5_slope_pct": "-0.7077%",
-              "ema20_slope_pct": "-0.4384%",
-              "price_distance_pct": "10.79%"
+              "last_close": "19,915.00",
+              "daily_return": "+1.30%",
+              "ema5": "20,596.23",
+              "ema20": "22,350.05",
+              "ema5_slope": "-151.3854",
+              "ema20_slope": "-99.3899",
+              "ema5_slope_pct": "-0.7297%",
+              "ema20_slope_pct": "-0.4427%",
+              "price_distance_pct": "10.90%"
             }
           }
         ],
@@ -1266,7 +1266,7 @@
           22950.0,
           23760.0,
           22935.0,
-          23320.0
+          23245.0
         ],
         "ema5_data": [
           26624.0,
@@ -1328,7 +1328,7 @@
           23992.75,
           23950.43,
           23765.81,
-          23684.75
+          23671.12
         ],
         "ema20_data": [
           26624.0,
@@ -1390,7 +1390,7 @@
           25422.26,
           25357.07,
           25262.09,
-          25185.93
+          25182.99
         ]
       }
     }
